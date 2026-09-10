@@ -1,0 +1,2126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="theme-color"
+        content="#080808"
+    >
+
+    <title>
+        Administration — Atelier jeu d'échecs Lezay
+    </title>
+
+    <!--
+        =====================================================
+        SUPABASE
+        =====================================================
+    -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+    <style>
+
+        /* =====================================================
+           RESET
+        ===================================================== */
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+
+            min-height: 100vh;
+
+            background: #080808;
+
+            color: #f5f5f5;
+
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Helvetica,
+                Arial,
+                sans-serif;
+
+            overflow-x: hidden;
+        }
+
+
+        /* =====================================================
+           VARIABLES
+        ===================================================== */
+
+        :root {
+
+            --black: #080808;
+            --black-soft: #101010;
+            --black-card: #121212;
+
+            --white: #f5f5f5;
+            --white-soft: #cfcfcf;
+            --gray: #858585;
+            --gray-dark: #242424;
+
+            --border: rgba(255, 255, 255, 0.10);
+            --border-hover: rgba(255, 255, 255, 0.22);
+
+            --sidebar-width: 260px;
+
+        }
+
+
+        /* =====================================================
+           PAGE
+        ===================================================== */
+
+        .app {
+            display: flex;
+
+            min-height: 100vh;
+        }
+
+
+        /* =====================================================
+           SIDEBAR
+        ===================================================== */
+
+        .sidebar {
+
+            position: fixed;
+
+            top: 0;
+            left: 0;
+            bottom: 0;
+
+            width: var(--sidebar-width);
+
+            background: #0b0b0b;
+
+            border-right: 1px solid var(--border);
+
+            display: flex;
+
+            flex-direction: column;
+
+            z-index: 100;
+
+        }
+
+
+        /* =====================================================
+           BRAND
+        ===================================================== */
+
+        .brand {
+
+            padding: 30px 26px 28px;
+
+            border-bottom: 1px solid var(--border);
+
+        }
+
+        .brand-logo {
+
+            width: 48px;
+            height: 48px;
+
+            object-fit: contain;
+
+            display: block;
+
+            margin-bottom: 18px;
+
+        }
+
+        .brand-title {
+
+            margin: 0;
+
+            font-family:
+                Georgia,
+                "Times New Roman",
+                serif;
+
+            font-size: 17px;
+
+            font-weight: 400;
+
+            letter-spacing: 0.4px;
+
+        }
+
+        .brand-subtitle {
+
+            margin: 6px 0 0;
+
+            font-size: 10px;
+
+            color: var(--gray);
+
+            text-transform: uppercase;
+
+            letter-spacing: 2px;
+
+        }
+
+
+        /* =====================================================
+           NAVIGATION
+        ===================================================== */
+
+        .navigation {
+
+            padding: 22px 14px;
+
+            flex: 1;
+
+        }
+
+        .nav-label {
+
+            padding: 0 12px;
+
+            margin: 0 0 12px;
+
+            font-size: 9px;
+
+            color: #666;
+
+            text-transform: uppercase;
+
+            letter-spacing: 2px;
+
+        }
+
+        .nav-item {
+
+            width: 100%;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 13px;
+
+            padding: 12px;
+
+            margin-bottom: 4px;
+
+            border: 1px solid transparent;
+
+            border-radius: 8px;
+
+            background: transparent;
+
+            color: #888;
+
+            font-size: 13px;
+
+            text-align: left;
+
+            cursor: pointer;
+
+            transition:
+                color .2s ease,
+                background .2s ease,
+                border-color .2s ease;
+
+        }
+
+        .nav-item:hover {
+
+            color: #fff;
+
+            background: #111;
+
+        }
+
+        .nav-item.active {
+
+            color: #fff;
+
+            background: #151515;
+
+            border-color: var(--border);
+
+        }
+
+        .nav-icon {
+
+            width: 18px;
+
+            text-align: center;
+
+            font-size: 14px;
+
+        }
+
+
+        /* =====================================================
+           SIDEBAR FOOTER
+        ===================================================== */
+
+        .sidebar-footer {
+
+            padding: 18px;
+
+            border-top: 1px solid var(--border);
+
+        }
+
+        .admin-user {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 11px;
+
+            margin-bottom: 15px;
+
+        }
+
+        .avatar {
+
+            width: 32px;
+            height: 32px;
+
+            border-radius: 50%;
+
+            background: #fff;
+
+            color: #000;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 12px;
+
+            font-weight: 700;
+
+        }
+
+        .admin-info {
+
+            min-width: 0;
+
+        }
+
+        .admin-label {
+
+            font-size: 11px;
+
+            color: #aaa;
+
+        }
+
+        .admin-email {
+
+            margin-top: 2px;
+
+            font-size: 10px;
+
+            color: #666;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+
+            white-space: nowrap;
+
+        }
+
+        .logout-button {
+
+            width: 100%;
+
+            height: 38px;
+
+            border: 1px solid var(--border);
+
+            border-radius: 7px;
+
+            background: transparent;
+
+            color: #aaa;
+
+            cursor: pointer;
+
+            font-size: 11px;
+
+            transition: all .2s ease;
+
+        }
+
+        .logout-button:hover {
+
+            border-color: #555;
+
+            color: #fff;
+
+            background: #151515;
+
+        }
+
+
+        /* =====================================================
+           MAIN
+        ===================================================== */
+
+        .main {
+
+            margin-left: var(--sidebar-width);
+
+            width: calc(100% - var(--sidebar-width));
+
+            min-height: 100vh;
+
+            background:
+                radial-gradient(
+                    circle at 80% 0%,
+                    rgba(255,255,255,.035),
+                    transparent 35%
+                ),
+                #080808;
+
+        }
+
+
+        /* =====================================================
+           TOPBAR
+        ===================================================== */
+
+        .topbar {
+
+            height: 78px;
+
+            padding: 0 42px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            border-bottom: 1px solid var(--border);
+
+        }
+
+        .page-title {
+
+            margin: 0;
+
+            font-family:
+                Georgia,
+                "Times New Roman",
+                serif;
+
+            font-size: 22px;
+
+            font-weight: 400;
+
+            letter-spacing: .2px;
+
+        }
+
+        .page-date {
+
+            font-size: 11px;
+
+            color: #666;
+
+            letter-spacing: .5px;
+
+        }
+
+
+        /* =====================================================
+           CONTENT
+        ===================================================== */
+
+        .content {
+
+            padding: 42px;
+
+            max-width: 1500px;
+
+        }
+
+
+        /* =====================================================
+           WELCOME
+        ===================================================== */
+
+        .welcome {
+
+            margin-bottom: 38px;
+
+        }
+
+        .welcome-eyebrow {
+
+            margin-bottom: 9px;
+
+            color: #777;
+
+            font-size: 9px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 2.5px;
+
+        }
+
+        .welcome h2 {
+
+            margin: 0;
+
+            font-family:
+                Georgia,
+                "Times New Roman",
+                serif;
+
+            font-size: 32px;
+
+            font-weight: 400;
+
+            letter-spacing: -.4px;
+
+        }
+
+        .welcome p {
+
+            margin: 10px 0 0;
+
+            max-width: 600px;
+
+            color: #777;
+
+            font-size: 13px;
+
+            line-height: 1.7;
+
+        }
+
+
+        /* =====================================================
+           STATISTICS
+        ===================================================== */
+
+        .stats {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, minmax(0, 1fr));
+
+            gap: 14px;
+
+            margin-bottom: 32px;
+
+        }
+
+        .stat-card {
+
+            min-height: 145px;
+
+            padding: 23px;
+
+            background: #101010;
+
+            border: 1px solid var(--border);
+
+            border-radius: 10px;
+
+            transition:
+                border-color .2s ease,
+                transform .2s ease;
+
+        }
+
+        .stat-card:hover {
+
+            border-color: var(--border-hover);
+
+            transform: translateY(-2px);
+
+        }
+
+        .stat-label {
+
+            color: #777;
+
+            font-size: 9px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1.8px;
+
+        }
+
+        .stat-value {
+
+            margin-top: 24px;
+
+            font-family:
+                Georgia,
+                "Times New Roman",
+                serif;
+
+            font-size: 38px;
+
+            font-weight: 400;
+
+            color: #fff;
+
+        }
+
+        .stat-description {
+
+            margin-top: 7px;
+
+            font-size: 10px;
+
+            color: #555;
+
+        }
+
+
+        /* =====================================================
+           GRID
+        ===================================================== */
+
+        .dashboard-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                minmax(0, 1.6fr)
+                minmax(300px, 1fr);
+
+            gap: 16px;
+
+        }
+
+
+        /* =====================================================
+           PANEL
+        ===================================================== */
+
+        .panel {
+
+            background: #101010;
+
+            border: 1px solid var(--border);
+
+            border-radius: 10px;
+
+            overflow: hidden;
+
+        }
+
+        .panel-header {
+
+            min-height: 68px;
+
+            padding: 0 22px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            border-bottom: 1px solid var(--border);
+
+        }
+
+        .panel-title {
+
+            margin: 0;
+
+            font-family:
+                Georgia,
+                "Times New Roman",
+                serif;
+
+            font-size: 16px;
+
+            font-weight: 400;
+
+        }
+
+        .panel-action {
+
+            border: none;
+
+            background: transparent;
+
+            color: #777;
+
+            font-size: 10px;
+
+            cursor: pointer;
+
+        }
+
+        .panel-action:hover {
+
+            color: #fff;
+
+        }
+
+
+        /* =====================================================
+           STUDENT TABLE
+        ===================================================== */
+
+        .table-wrapper {
+
+            overflow-x: auto;
+
+        }
+
+        table {
+
+            width: 100%;
+
+            border-collapse: collapse;
+
+        }
+
+        th {
+
+            padding: 14px 22px;
+
+            text-align: left;
+
+            color: #555;
+
+            font-size: 9px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1.4px;
+
+            font-weight: 500;
+
+            white-space: nowrap;
+
+        }
+
+        td {
+
+            padding: 16px 22px;
+
+            border-top: 1px solid rgba(255,255,255,.055);
+
+            color: #bbb;
+
+            font-size: 12px;
+
+        }
+
+        tbody tr {
+
+            transition: background .2s ease;
+
+        }
+
+        tbody tr:hover {
+
+            background: #151515;
+
+        }
+
+        .student-name {
+
+            color: #fff;
+
+            font-weight: 500;
+
+        }
+
+        .class-badge {
+
+            display: inline-block;
+
+            padding: 4px 8px;
+
+            border: 1px solid var(--border);
+
+            border-radius: 4px;
+
+            color: #aaa;
+
+            font-size: 10px;
+
+        }
+
+
+        /* =====================================================
+           EMPTY STATE
+        ===================================================== */
+
+        .empty {
+
+            padding: 45px 20px;
+
+            text-align: center;
+
+            color: #555;
+
+            font-size: 12px;
+
+        }
+
+
+        /* =====================================================
+           QUICK ACTIONS
+        ===================================================== */
+
+        .quick-actions {
+
+            padding: 18px;
+
+        }
+
+        .quick-action {
+
+            width: 100%;
+
+            min-height: 68px;
+
+            margin-bottom: 9px;
+
+            padding: 14px;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 14px;
+
+            background: #141414;
+
+            border: 1px solid var(--border);
+
+            border-radius: 8px;
+
+            color: #fff;
+
+            text-align: left;
+
+            cursor: pointer;
+
+            transition: all .2s ease;
+
+        }
+
+        .quick-action:last-child {
+
+            margin-bottom: 0;
+
+        }
+
+        .quick-action:hover {
+
+            background: #191919;
+
+            border-color: var(--border-hover);
+
+        }
+
+        .quick-icon {
+
+            width: 35px;
+            height: 35px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            border: 1px solid #333;
+
+            border-radius: 6px;
+
+            color: #aaa;
+
+        }
+
+        .quick-text strong {
+
+            display: block;
+
+            font-size: 12px;
+
+            font-weight: 500;
+
+        }
+
+        .quick-text span {
+
+            display: block;
+
+            margin-top: 4px;
+
+            color: #666;
+
+            font-size: 10px;
+
+        }
+
+
+        /* =====================================================
+           LOADING
+        ===================================================== */
+
+        .loading {
+
+            position: fixed;
+
+            inset: 0;
+
+            background: #080808;
+
+            z-index: 9999;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            transition: opacity .4s ease;
+
+        }
+
+        .loading.hidden {
+
+            opacity: 0;
+
+            pointer-events: none;
+
+        }
+
+        .loading-inner {
+
+            text-align: center;
+
+        }
+
+        .loading-logo {
+
+            width: 60px;
+            height: 60px;
+
+            object-fit: contain;
+
+            margin-bottom: 18px;
+
+        }
+
+        .loading-text {
+
+            color: #666;
+
+            font-size: 10px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 2px;
+
+        }
+
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media (max-width: 1100px) {
+
+            .stats {
+
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+
+            }
+
+            .dashboard-grid {
+
+                grid-template-columns: 1fr;
+
+            }
+
+        }
+
+
+        @media (max-width: 760px) {
+
+            .sidebar {
+
+                width: 72px;
+
+            }
+
+            .brand {
+
+                padding: 20px 12px;
+
+                display: flex;
+
+                justify-content: center;
+
+            }
+
+            .brand-logo {
+
+                margin: 0;
+
+                width: 40px;
+                height: 40px;
+
+            }
+
+            .brand-title,
+            .brand-subtitle,
+            .nav-label,
+            .nav-item span,
+            .admin-info,
+            .logout-button {
+
+                display: none;
+
+            }
+
+            .navigation {
+
+                padding: 15px 9px;
+
+            }
+
+            .nav-item {
+
+                justify-content: center;
+
+                padding: 13px 5px;
+
+            }
+
+            .nav-icon {
+
+                font-size: 16px;
+
+            }
+
+            .sidebar-footer {
+
+                padding: 12px;
+
+            }
+
+            .admin-user {
+
+                justify-content: center;
+
+            }
+
+            .main {
+
+                margin-left: 72px;
+
+                width: calc(100% - 72px);
+
+            }
+
+            .topbar {
+
+                padding: 0 22px;
+
+            }
+
+            .content {
+
+                padding: 25px 18px;
+
+            }
+
+            .welcome h2 {
+
+                font-size: 27px;
+
+            }
+
+        }
+
+
+        @media (max-width: 480px) {
+
+            .stats {
+
+                grid-template-columns: 1fr;
+
+            }
+
+            .page-date {
+
+                display: none;
+
+            }
+
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     LOADING
+========================================================= -->
+
+<div
+    class="loading"
+    id="loadingScreen"
+>
+
+    <div class="loading-inner">
+
+        <img
+            class="loading-logo"
+            src="https://image-namanhstudio.weebly.com/uploads/1/5/5/3/155356283/icon-echec-lezay_orig.png"
+            alt="Atelier jeu d'échecs Lezay"
+        >
+
+        <div class="loading-text">
+            Vérification de la session
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<div class="app" id="app">
+
+
+    <!-- =====================================================
+         SIDEBAR
+    ===================================================== -->
+
+    <aside class="sidebar">
+
+
+        <div class="brand">
+
+            <img
+                class="brand-logo"
+                src="https://image-namanhstudio.weebly.com/uploads/1/5/5/3/155356283/icon-echec-lezay_orig.png"
+                alt="Atelier jeu d'échecs Lezay"
+            >
+
+            <h1 class="brand-title">
+                Atelier jeu d'échecs Lezay
+            </h1>
+
+            <p class="brand-subtitle">
+                Administration
+            </p>
+
+        </div>
+
+
+
+        <nav class="navigation">
+
+            <div class="nav-label">
+                Administration
+            </div>
+
+
+            <button
+                class="nav-item active"
+                onclick="showSection('dashboard')"
+            >
+                <span class="nav-icon">⌂</span>
+                <span>Tableau de bord</span>
+            </button>
+
+
+            <button
+                class="nav-item"
+                onclick="showSection('students')"
+            >
+                <span class="nav-icon">♙</span>
+                <span>Élèves</span>
+            </button>
+
+
+            <button
+                class="nav-item"
+                onclick="showSection('attendance')"
+            >
+                <span class="nav-icon">✓</span>
+                <span>Feuille d'appel</span>
+            </button>
+
+
+            <button
+                class="nav-item"
+                onclick="showSection('news')"
+            >
+                <span class="nav-icon">□</span>
+                <span>Actualités</span>
+            </button>
+
+
+            <div
+                class="nav-label"
+                style="margin-top:28px;"
+            >
+                Système
+            </div>
+
+
+            <button
+                class="nav-item"
+                onclick="showSection('settings')"
+            >
+                <span class="nav-icon">⚙</span>
+                <span>Paramètres</span>
+            </button>
+
+        </nav>
+
+
+
+        <div class="sidebar-footer">
+
+            <div class="admin-user">
+
+                <div
+                    class="avatar"
+                    id="adminAvatar"
+                >
+                    A
+                </div>
+
+                <div class="admin-info">
+
+                    <div class="admin-label">
+                        Administrateur
+                    </div>
+
+                    <div
+                        class="admin-email"
+                        id="adminEmail"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <button
+                class="logout-button"
+                onclick="logout()"
+            >
+                Se déconnecter
+            </button>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- =====================================================
+         MAIN
+    ===================================================== -->
+
+    <main class="main">
+
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <h2
+                class="page-title"
+                id="pageTitle"
+            >
+                Tableau de bord
+            </h2>
+
+            <div
+                class="page-date"
+                id="currentDate"
+            >
+                —
+            </div>
+
+        </header>
+
+
+
+        <!-- =================================================
+             DASHBOARD CONTENT
+        ================================================= -->
+
+        <div class="content">
+
+
+            <section class="welcome">
+
+                <div class="welcome-eyebrow">
+                    Espace administration
+                </div>
+
+                <h2 id="welcomeTitle">
+                    Bienvenue
+                </h2>
+
+                <p>
+                    Gestion de l'Atelier jeu d'échecs Lezay,
+                    des élèves, des présences et des actualités.
+                </p>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 STATISTICS
+            ================================================= -->
+
+            <section class="stats">
+
+
+                <div class="stat-card">
+
+                    <div class="stat-label">
+                        Élèves inscrits
+                    </div>
+
+                    <div
+                        class="stat-value"
+                        id="studentCount"
+                    >
+                        —
+                    </div>
+
+                    <div class="stat-description">
+                        Membres actifs du club
+                    </div>
+
+                </div>
+
+
+
+                <div class="stat-card">
+
+                    <div class="stat-label">
+                        Présents
+                    </div>
+
+                    <div
+                        class="stat-value"
+                        id="presentCount"
+                    >
+                        —
+                    </div>
+
+                    <div class="stat-description">
+                        Dernière feuille d'appel
+                    </div>
+
+                </div>
+
+
+
+                <div class="stat-card">
+
+                    <div class="stat-label">
+                        Absences
+                    </div>
+
+                    <div
+                        class="stat-value"
+                        id="absenceCount"
+                    >
+                        —
+                    </div>
+
+                    <div class="stat-description">
+                        Total enregistré
+                    </div>
+
+                </div>
+
+
+
+                <div class="stat-card">
+
+                    <div class="stat-label">
+                        Actualités
+                    </div>
+
+                    <div
+                        class="stat-value"
+                        id="newsCount"
+                    >
+                        —
+                    </div>
+
+                    <div class="stat-description">
+                        Publications du club
+                    </div>
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 DASHBOARD GRID
+            ================================================= -->
+
+            <section class="dashboard-grid">
+
+
+                <!-- RECENT STUDENTS -->
+
+                <div class="panel">
+
+                    <div class="panel-header">
+
+                        <h3 class="panel-title">
+                            Inscriptions récentes
+                        </h3>
+
+                        <button
+                            class="panel-action"
+                            onclick="showSection('students')"
+                        >
+                            Voir tous les élèves →
+                        </button>
+
+                    </div>
+
+
+                    <div class="table-wrapper">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Élève
+                                    </th>
+
+                                    <th>
+                                        Classe
+                                    </th>
+
+                                    <th>
+                                        Inscription
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="recentStudents">
+
+                                <tr>
+
+                                    <td
+                                        colspan="3"
+                                        class="empty"
+                                    >
+                                        Chargement...
+
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- QUICK ACTIONS -->
+
+                <div class="panel">
+
+                    <div class="panel-header">
+
+                        <h3 class="panel-title">
+                            Actions rapides
+                        </h3>
+
+                    </div>
+
+
+                    <div class="quick-actions">
+
+
+                        <button
+                            class="quick-action"
+                            onclick="showSection('students')"
+                        >
+
+                            <div class="quick-icon">
+                                ♙
+                            </div>
+
+                            <div class="quick-text">
+
+                                <strong>
+                                    Gérer les élèves
+                                </strong>
+
+                                <span>
+                                    Consulter les inscriptions
+                                </span>
+
+                            </div>
+
+                        </button>
+
+
+
+                        <button
+                            class="quick-action"
+                            onclick="showSection('attendance')"
+                        >
+
+                            <div class="quick-icon">
+                                ✓
+                            </div>
+
+                            <div class="quick-text">
+
+                                <strong>
+                                    Faire l'appel
+                                </strong>
+
+                                <span>
+                                    Enregistrer les présences
+                                </span>
+
+                            </div>
+
+                        </button>
+
+
+
+                        <button
+                            class="quick-action"
+                            onclick="showSection('news')"
+                        >
+
+                            <div class="quick-icon">
+                                +
+                            </div>
+
+                            <div class="quick-text">
+
+                                <strong>
+                                    Nouvelle actualité
+                                </strong>
+
+                                <span>
+                                    Publier une information
+                                </span>
+
+                            </div>
+
+                        </button>
+
+
+                    </div>
+
+                </div>
+
+
+            </section>
+
+
+        </div>
+
+    </main>
+
+</div>
+
+
+
+<script>
+
+/* =========================================================
+   SUPABASE CONFIGURATION
+========================================================= */
+
+const SUPABASE_URL =
+    'https://mulwdqtyojndrjbpgldk.supabase.co';
+
+const SUPABASE_PUBLISHABLE_KEY =
+    'sb_publishable_AdZl_u0YAK2xSiv3pX74iA_Q2GMnIwz';
+
+
+const {
+    createClient
+} = supabase;
+
+
+const db = createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+);
+
+
+
+/* =========================================================
+   SESSION CHECK
+========================================================= */
+
+async function checkAuthentication() {
+
+    const {
+        data,
+        error
+    } = await db.auth.getSession();
+
+
+    if (
+        error ||
+        !data.session
+    ) {
+
+        /*
+         * L'utilisateur n'est pas connecté.
+         *
+         * Retour automatique vers login.html
+         */
+
+        window.location.replace(
+            'login.html'
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Utilisateur connecté
+     */
+
+    const user =
+        data.session.user;
+
+
+    document.getElementById(
+        'adminEmail'
+    ).textContent =
+        user.email || 'Administrateur';
+
+
+    /*
+     * Première lettre de l'e-mail
+     */
+
+    document.getElementById(
+        'adminAvatar'
+    ).textContent =
+        (
+            user.email || 'A'
+        )
+        .charAt(0)
+        .toUpperCase();
+
+
+    /*
+     * Message de bienvenue
+     */
+
+    const emailName =
+        (
+            user.email || 'Administrateur'
+        )
+        .split('@')[0];
+
+
+    document.getElementById(
+        'welcomeTitle'
+    ).textContent =
+        'Bienvenue, ' +
+        emailName;
+
+
+    /*
+     * Charger les données
+     */
+
+    await loadDashboard();
+
+
+    /*
+     * Cacher l'écran de chargement
+     */
+
+    const loading =
+        document.getElementById(
+            'loadingScreen'
+        );
+
+    loading.classList.add(
+        'hidden'
+    );
+
+}
+
+
+
+/* =========================================================
+   LOAD DASHBOARD
+========================================================= */
+
+async function loadDashboard() {
+
+    await Promise.all([
+        loadStudents(),
+        loadAttendance(),
+        loadNews()
+    ]);
+
+}
+
+
+
+/* =========================================================
+   STUDENTS
+========================================================= */
+
+async function loadStudents() {
+
+    const {
+        data,
+        error
+    } = await db
+        .from('students')
+        .select('*')
+        .eq('active', true)
+        .order(
+            'registered_at',
+            {
+                ascending: false
+            }
+        );
+
+
+    if (error) {
+
+        console.error(
+            'Students:',
+            error
+        );
+
+        document.getElementById(
+            'studentCount'
+        ).textContent = '—';
+
+        return;
+
+    }
+
+
+    /*
+     * Nombre total d'élèves
+     */
+
+    document.getElementById(
+        'studentCount'
+    ).textContent =
+        data.length;
+
+
+    /*
+     * Les 5 inscriptions récentes
+     */
+
+    const recent =
+        data.slice(0, 5);
+
+
+    const tbody =
+        document.getElementById(
+            'recentStudents'
+        );
+
+
+    if (!recent.length) {
+
+        tbody.innerHTML = `
+            <tr>
+                <td
+                    colspan="3"
+                    class="empty"
+                >
+                    Aucune inscription pour le moment.
+                </td>
+            </tr>
+        `;
+
+        return;
+
+    }
+
+
+    tbody.innerHTML =
+        recent.map(
+            student => {
+
+                const name =
+                    [
+                        student.first_name,
+                        student.last_name
+                    ]
+                    .filter(Boolean)
+                    .join(' ');
+
+
+                const date =
+                    student.registered_at
+                        ? new Date(
+                            student.registered_at
+                        ).toLocaleDateString(
+                            'fr-FR'
+                        )
+                        : '—';
+
+
+                return `
+                    <tr>
+
+                        <td>
+                            <span class="student-name">
+                                ${escapeHTML(name)}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="class-badge">
+                                ${escapeHTML(
+                                    student.class_name || '—'
+                                )}
+                            </span>
+                        </td>
+
+                        <td>
+                            ${date}
+                        </td>
+
+                    </tr>
+                `;
+
+            }
+        )
+        .join('');
+
+}
+
+
+
+/* =========================================================
+   ATTENDANCE
+========================================================= */
+
+async function loadAttendance() {
+
+    const {
+        data,
+        error
+    } = await db
+        .from('attendance')
+        .select('status');
+
+
+    if (error) {
+
+        console.error(
+            'Attendance:',
+            error
+        );
+
+        return;
+
+    }
+
+
+    const present =
+        data.filter(
+            item =>
+                item.status === 'present'
+        ).length;
+
+
+    const absent =
+        data.filter(
+            item =>
+                item.status === 'absent'
+        ).length;
+
+
+    document.getElementById(
+        'presentCount'
+    ).textContent =
+        present;
+
+
+    document.getElementById(
+        'absenceCount'
+    ).textContent =
+        absent;
+
+}
+
+
+
+/* =========================================================
+   NEWS
+========================================================= */
+
+async function loadNews() {
+
+    const {
+        data,
+        error
+    } = await db
+        .from('news')
+        .select('id');
+
+
+    if (error) {
+
+        console.error(
+            'News:',
+            error
+        );
+
+        return;
+
+    }
+
+
+    document.getElementById(
+        'newsCount'
+    ).textContent =
+        data.length;
+
+}
+
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+function showSection(section) {
+
+    /*
+     * Pour le moment, seul le dashboard
+     * est développé dans index.html.
+     *
+     * Les autres pages seront connectées
+     * ensuite.
+     */
+
+    const titles = {
+
+        dashboard:
+            'Tableau de bord',
+
+        students:
+            'Élèves',
+
+        attendance:
+            "Feuille d'appel",
+
+        news:
+            'Actualités',
+
+        settings:
+            'Paramètres'
+
+    };
+
+
+    document.getElementById(
+        'pageTitle'
+    ).textContent =
+        titles[section] ||
+        'Administration';
+
+
+    /*
+     * Marquer le menu actif
+     */
+
+    document
+        .querySelectorAll(
+            '.nav-item'
+        )
+        .forEach(
+            item =>
+                item.classList.remove(
+                    'active'
+                )
+        );
+
+
+    /*
+     * Pour l'instant,
+     * les pages seront ajoutées ensuite.
+     */
+
+    if (section !== 'dashboard') {
+
+        alert(
+            titles[section] +
+            ' — cette section sera ajoutée prochainement.'
+        );
+
+    }
+
+}
+
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+async function logout() {
+
+    await db.auth.signOut();
+
+    window.location.replace(
+        'login.html'
+    );
+
+}
+
+
+
+/* =========================================================
+   HTML SECURITY
+========================================================= */
+
+function escapeHTML(value) {
+
+    return String(value)
+        .replace(
+            /&/g,
+            '&amp;'
+        )
+        .replace(
+            /</g,
+            '&lt;'
+        )
+        .replace(
+            />/g,
+            '&gt;'
+        )
+        .replace(
+            /"/g,
+            '&quot;'
+        )
+        .replace(
+            /'/g,
+            '&#039;'
+        );
+
+}
+
+
+
+/* =========================================================
+   DATE
+========================================================= */
+
+function displayDate() {
+
+    const date =
+        new Date();
+
+
+    document.getElementById(
+        'currentDate'
+    ).textContent =
+        date.toLocaleDateString(
+            'fr-FR',
+            {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            }
+        );
+
+}
+
+
+
+/* =========================================================
+   START
+========================================================= */
+
+displayDate();
+
+checkAuthentication();
+
+</script>
+
+</body>
+</html>
