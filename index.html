@@ -1,4107 +1,2327 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#0a0a0a">
-
-    <title>Administration — Atelier jeu d'échecs Lezay</title>
-
-    <link rel="icon"
-          href="https://image-namanhstudio.weebly.com/uploads/1/5/5/3/155356283/icon-echec-lezay_orig.png">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <style>
-        :root {
-            --black: #090909;
-            --black-2: #111111;
-            --black-3: #181818;
-
-            --white: #ffffff;
-            --off-white: #f7f7f5;
-            --gray-50: #fafafa;
-            --gray-100: #f1f1ef;
-            --gray-200: #e4e4e1;
-            --gray-300: #d0d0cc;
-            --gray-400: #999993;
-            --gray-500: #777770;
-            --gray-600: #555550;
-            --gray-700: #383835;
-
-            --green: #287a4a;
-            --red: #b83a3a;
-            --orange: #b46d18;
-
-            --sidebar-width: 260px;
-            --radius: 18px;
-
-            --shadow: 0 20px 60px rgba(0,0,0,.10);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            font-family: "DM Sans", sans-serif;
-            background: var(--off-white);
-            color: var(--black);
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        button,
-        input,
-        textarea,
-        select {
-            font: inherit;
-        }
-
-        button {
-            cursor: pointer;
-        }
-
-        /* ========================================
-           SIDEBAR
-        ======================================== */
-
-        .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: var(--sidebar-width);
-            background: var(--black);
-            color: white;
-            padding: 28px 18px;
-            display: flex;
-            flex-direction: column;
-            z-index: 100;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 0 10px 30px;
-        }
-
-        .brand-logo {
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
-            object-fit: cover;
-            background: white;
-        }
-
-        .brand-text {
-            min-width: 0;
-        }
-
-        .brand-title {
-            font-family: "Manrope", sans-serif;
-            font-size: 14px;
-            font-weight: 800;
-            line-height: 1.2;
-        }
-
-        .brand-subtitle {
-            color: #888;
-            font-size: 10px;
-            margin-top: 3px;
-            text-transform: uppercase;
-            letter-spacing: .09em;
-        }
-
-        .nav-label {
-            color: #666;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: .14em;
-            font-weight: 700;
-            padding: 10px 12px;
-            margin-bottom: 5px;
-        }
-
-        .nav {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .nav-button {
-            width: 100%;
-            border: 0;
-            background: transparent;
-            color: #a3a3a3;
-            padding: 12px 13px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-align: left;
-            transition: .2s ease;
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        .nav-button:hover {
-            color: white;
-            background: #161616;
-        }
-
-        .nav-button.active {
-            background: white;
-            color: black;
-        }
-
-        .nav-icon {
-            width: 18px;
-            height: 18px;
-            display: grid;
-            place-items: center;
-            flex-shrink: 0;
-        }
-
-        .sidebar-bottom {
-            margin-top: auto;
-        }
-
-        .user-box {
-            padding: 14px;
-            border: 1px solid #222;
-            border-radius: 14px;
-            background: #101010;
-            margin-bottom: 10px;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .avatar {
-            width: 34px;
-            height: 34px;
-            background: white;
-            color: black;
-            border-radius: 50%;
-            display: grid;
-            place-items: center;
-            font-size: 12px;
-            font-weight: 800;
-        }
-
-        .user-email {
-            font-size: 11px;
-            color: #aaa;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .user-role {
-            color: #666;
-            font-size: 9px;
-            text-transform: uppercase;
-            letter-spacing: .1em;
-            margin-top: 2px;
-        }
-
-        .logout-button {
-            width: 100%;
-            background: transparent;
-            border: 1px solid #292929;
-            color: #aaa;
-            border-radius: 11px;
-            padding: 10px;
-            font-size: 12px;
-            transition: .2s;
-        }
-
-        .logout-button:hover {
-            color: white;
-            border-color: #555;
-        }
-
-        /* ========================================
-           MAIN
-        ======================================== */
-
-        .main {
-            margin-left: var(--sidebar-width);
-            min-height: 100vh;
-        }
-
-        .topbar {
-            height: 76px;
-            padding: 0 38px;
-            border-bottom: 1px solid var(--gray-200);
-            background: rgba(247,247,245,.88);
-            backdrop-filter: blur(15px);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 50;
-        }
-
-        .topbar-left {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .topbar-kicker {
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: .14em;
-            color: var(--gray-500);
-            font-weight: 700;
-        }
-
-        .topbar-title {
-            font-family: "Manrope", sans-serif;
-            font-size: 19px;
-            font-weight: 800;
-        }
-
-        .topbar-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .icon-button {
-            width: 38px;
-            height: 38px;
-            border: 1px solid var(--gray-200);
-            background: white;
-            border-radius: 11px;
-            display: grid;
-            place-items: center;
-            transition: .2s;
-        }
-
-        .icon-button:hover {
-            border-color: var(--gray-400);
-            transform: translateY(-1px);
-        }
-
-        /* ========================================
-           CONTENT
-        ======================================== */
-
-        .content {
-            max-width: 1500px;
-            padding: 42px 38px 70px;
-            margin: auto;
-        }
-
-        .hero {
-            background: var(--black);
-            color: white;
-            border-radius: 24px;
-            padding: 42px;
-            min-height: 260px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 26px;
-        }
-
-        .hero::before {
-            content: "♟";
-            position: absolute;
-            right: 40px;
-            top: -55px;
-            font-size: 300px;
-            line-height: 1;
-            color: rgba(255,255,255,.035);
-            transform: rotate(-8deg);
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 2;
-        }
-
-        .hero-eyebrow {
-            font-size: 10px;
-            letter-spacing: .18em;
-            text-transform: uppercase;
-            color: #888;
-            font-weight: 700;
-            margin-bottom: 14px;
-        }
-
-        .hero h1 {
-            font-family: "Manrope", sans-serif;
-            font-size: clamp(30px, 4vw, 50px);
-            letter-spacing: -.045em;
-            line-height: 1;
-            max-width: 700px;
-        }
-
-        .hero p {
-            color: #999;
-            font-size: 13px;
-            margin-top: 16px;
-            max-width: 550px;
-            line-height: 1.6;
-        }
-
-        .hero-date {
-            position: relative;
-            z-index: 2;
-            color: #777;
-            font-size: 11px;
-            text-align: right;
-        }
-
-        /* ========================================
-           STATS
-        ======================================== */
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 14px;
-            margin-bottom: 26px;
-        }
-
-        .stat-card {
-            background: white;
-            border: 1px solid var(--gray-200);
-            border-radius: var(--radius);
-            padding: 22px;
-            min-height: 140px;
-            transition: .25s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(0,0,0,.06);
-        }
-
-        .stat-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .stat-label {
-            color: var(--gray-500);
-            text-transform: uppercase;
-            letter-spacing: .1em;
-            font-size: 9px;
-            font-weight: 700;
-        }
-
-        .stat-icon {
-            width: 31px;
-            height: 31px;
-            border-radius: 9px;
-            background: var(--gray-100);
-            display: grid;
-            place-items: center;
-            font-size: 14px;
-        }
-
-        .stat-value {
-            font-family: "Manrope", sans-serif;
-            font-size: 34px;
-            font-weight: 800;
-            letter-spacing: -.05em;
-            margin-top: 22px;
-        }
-
-        .stat-description {
-            color: var(--gray-500);
-            font-size: 10px;
-            margin-top: 3px;
-        }
-
-        /* ========================================
-           SECTIONS
-        ======================================== */
-
-        .section-grid {
-            display: grid;
-            grid-template-columns: 1.5fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .panel {
-            background: white;
-            border: 1px solid var(--gray-200);
-            border-radius: var(--radius);
-            overflow: hidden;
-        }
-
-        .panel-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 21px 22px;
-            border-bottom: 1px solid var(--gray-200);
-        }
-
-        .panel-title {
-            font-family: "Manrope", sans-serif;
-            font-size: 15px;
-            font-weight: 800;
-        }
-
-        .panel-subtitle {
-            font-size: 10px;
-            color: var(--gray-500);
-            margin-top: 3px;
-        }
-
-        .text-button {
-            background: transparent;
-            border: 0;
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--black);
-            text-decoration: underline;
-            text-underline-offset: 4px;
-        }
-
-        /* ========================================
-           STUDENTS TABLE
-        ======================================== */
-
-        .table-wrap {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            padding: 12px 20px;
-            background: var(--gray-50);
-            text-align: left;
-            font-size: 9px;
-            text-transform: uppercase;
-            letter-spacing: .09em;
-            color: var(--gray-500);
-            font-weight: 700;
-            white-space: nowrap;
-        }
-
-        td {
-            padding: 14px 20px;
-            border-top: 1px solid var(--gray-100);
-            font-size: 12px;
-            white-space: nowrap;
-        }
-
-        tr.student-row {
-            cursor: pointer;
-            transition: .15s;
-        }
-
-        tr.student-row:hover {
-            background: var(--gray-50);
-        }
-
-        .student-name {
-            font-weight: 700;
-        }
-
-        .student-class {
-            color: var(--gray-500);
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            border-radius: 100px;
-            padding: 5px 9px;
-            font-size: 9px;
-            font-weight: 700;
-        }
-
-        .badge-present {
-            background: #e9f5ed;
-            color: var(--green);
-        }
-
-        .badge-absent {
-            background: #faeeee;
-            color: var(--red);
-        }
-
-        .badge-neutral {
-            background: var(--gray-100);
-            color: var(--gray-600);
-        }
-
-        .empty {
-            padding: 35px 20px;
-            text-align: center;
-            color: var(--gray-500);
-            font-size: 12px;
-        }
-
-        /* ========================================
-           QUICK ACTIONS
-        ======================================== */
-
-        .quick-actions {
-            padding: 18px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .quick-action {
-            border: 1px solid var(--gray-200);
-            background: white;
-            border-radius: 13px;
-            padding: 17px;
-            text-align: left;
-            transition: .2s;
-        }
-
-        .quick-action:hover {
-            background: var(--black);
-            color: white;
-            border-color: var(--black);
-            transform: translateY(-2px);
-        }
-
-        .quick-action-icon {
-            font-size: 20px;
-            margin-bottom: 14px;
-        }
-
-        .quick-action-title {
-            font-weight: 700;
-            font-size: 12px;
-        }
-
-        .quick-action-description {
-            color: var(--gray-500);
-            font-size: 9px;
-            line-height: 1.5;
-            margin-top: 4px;
-        }
-
-        .quick-action:hover .quick-action-description {
-            color: #999;
-        }
-
-        /* ========================================
-           NEWS
-        ======================================== */
-
-        .news-list {
-            padding: 5px 20px 15px;
-        }
-
-        .news-item {
-            padding: 15px 0;
-            border-bottom: 1px solid var(--gray-100);
-        }
-
-        .news-item:last-child {
-            border-bottom: 0;
-        }
-
-        .news-item-title {
-            font-size: 12px;
-            font-weight: 700;
-        }
-
-        .news-item-meta {
-            color: var(--gray-500);
-            font-size: 9px;
-            margin-top: 5px;
-        }
-
-        /* ========================================
-           MODAL
-        ======================================== */
-
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,.58);
-            backdrop-filter: blur(9px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 25px;
-            z-index: 500;
-            opacity: 0;
-            visibility: hidden;
-            transition: .22s ease;
-        }
-
-        .modal-overlay.open {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal {
-            background: white;
-            width: min(920px, 100%);
-            max-height: min(850px, 90vh);
-            border-radius: 23px;
-            overflow: hidden;
-            box-shadow: 0 30px 100px rgba(0,0,0,.28);
-            transform: translateY(15px) scale(.98);
-            transition: .22s ease;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .modal-overlay.open .modal {
-            transform: translateY(0) scale(1);
-        }
-
-        .modal.small {
-            width: min(560px, 100%);
-        }
-
-        .modal.large {
-            width: min(1100px, 100%);
-        }
-
-        .modal-header {
-            padding: 23px 25px;
-            border-bottom: 1px solid var(--gray-200);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-shrink: 0;
-        }
-
-        .modal-title {
-            font-family: "Manrope", sans-serif;
-            font-size: 19px;
-            font-weight: 800;
-        }
-
-        .modal-description {
-            font-size: 10px;
-            color: var(--gray-500);
-            margin-top: 3px;
-        }
-
-        .close-modal {
-            width: 35px;
-            height: 35px;
-            border: 1px solid var(--gray-200);
-            background: white;
-            border-radius: 10px;
-            font-size: 19px;
-            line-height: 1;
-        }
-
-        .modal-body {
-            overflow-y: auto;
-            padding: 25px;
-        }
-
-        .modal-footer {
-            padding: 17px 25px;
-            border-top: 1px solid var(--gray-200);
-            display: flex;
-            justify-content: flex-end;
-            gap: 9px;
-            flex-shrink: 0;
-        }
-
-        /* ========================================
-           FORMS
-        ======================================== */
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 17px;
-        }
-
-        .form-group {
-            margin-bottom: 17px;
-        }
-
-        .form-group.full {
-            grid-column: 1 / -1;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: .08em;
-            color: var(--gray-600);
-            font-weight: 700;
-            margin-bottom: 7px;
-        }
-
-        .form-input,
-        .form-select,
-        .form-textarea {
-            width: 100%;
-            border: 1px solid var(--gray-200);
-            background: var(--gray-50);
-            border-radius: 11px;
-            padding: 11px 13px;
-            outline: none;
-            font-size: 12px;
-            color: var(--black);
-            transition: .2s;
-        }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        .form-input:focus,
-        .form-select:focus,
-        .form-textarea:focus {
-            border-color: var(--black);
-            background: white;
-        }
-
-        .button {
-            border: 1px solid var(--black);
-            border-radius: 11px;
-            padding: 11px 16px;
-            font-size: 11px;
-            font-weight: 700;
-            transition: .2s;
-        }
-
-        .button-dark {
-            background: var(--black);
-            color: white;
-        }
-
-        .button-dark:hover {
-            background: #252525;
-        }
-
-        .button-light {
-            background: white;
-            color: var(--black);
-            border-color: var(--gray-200);
-        }
-
-        .button-light:hover {
-            border-color: var(--black);
-        }
-
-        .button-danger {
-            background: white;
-            color: var(--red);
-            border-color: #efcccc;
-        }
-
-        .button-danger:hover {
-            background: #fff5f5;
-        }
-
-        .button:disabled {
-            opacity: .45;
-            cursor: not-allowed;
-        }
-
-        /* ========================================
-           STUDENT DETAIL
-        ======================================== */
-
-        .profile-header {
-            background: var(--black);
-            color: white;
-            margin: -25px -25px 25px;
-            padding: 27px;
-            display: flex;
-            align-items: center;
-            gap: 17px;
-        }
-
-        .profile-avatar {
-            width: 58px;
-            height: 58px;
-            border-radius: 16px;
-            background: white;
-            color: black;
-            display: grid;
-            place-items: center;
-            font-family: "Manrope";
-            font-size: 19px;
-            font-weight: 800;
-        }
-
-        .profile-name {
-            font-family: "Manrope";
-            font-size: 21px;
-            font-weight: 800;
-        }
-
-        .profile-class {
-            color: #999;
-            font-size: 11px;
-            margin-top: 3px;
-        }
-
-        .detail-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 25px;
-        }
-
-        .detail-card {
-            border: 1px solid var(--gray-200);
-            background: var(--gray-50);
-            border-radius: 13px;
-            padding: 15px;
-        }
-
-        .detail-label {
-            font-size: 8px;
-            text-transform: uppercase;
-            letter-spacing: .1em;
-            color: var(--gray-500);
-            font-weight: 700;
-        }
-
-        .detail-value {
-            font-size: 13px;
-            font-weight: 700;
-            margin-top: 7px;
-            word-break: break-word;
-        }
-
-        /* ========================================
-           ATTENDANCE
-        ======================================== */
-
-        .attendance-toolbar {
-            display: flex;
-            gap: 10px;
-            align-items: flex-end;
-            margin-bottom: 20px;
-        }
-
-        .attendance-date {
-            flex: 0 0 190px;
-        }
-
-        .attendance-table td {
-            padding: 12px 15px;
-        }
-
-        .attendance-toggle {
-            display: inline-flex;
-            background: var(--gray-100);
-            border-radius: 9px;
-            padding: 3px;
-            gap: 2px;
-        }
-
-        .attendance-toggle button {
-            border: 0;
-            background: transparent;
-            border-radius: 7px;
-            padding: 7px 10px;
-            font-size: 9px;
-            font-weight: 700;
-        }
-
-        .attendance-toggle button.active-present {
-            background: #dff1e5;
-            color: var(--green);
-        }
-
-        .attendance-toggle button.active-absent {
-            background: #f6dddd;
-            color: var(--red);
-        }
-
-        /* ========================================
-           SETTINGS
-        ======================================== */
-
-        .setting-row {
-            padding: 17px 0;
-            border-bottom: 1px solid var(--gray-100);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .setting-title {
-            font-size: 12px;
-            font-weight: 700;
-        }
-
-        .setting-description {
-            font-size: 10px;
-            color: var(--gray-500);
-            margin-top: 3px;
-        }
-
-        /* ========================================
-           TOAST
-        ======================================== */
-
-        .toast-container {
-            position: fixed;
-            right: 22px;
-            bottom: 22px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 9px;
-        }
-
-        .toast {
-            background: var(--black);
-            color: white;
-            padding: 13px 16px;
-            border-radius: 12px;
-            font-size: 11px;
-            box-shadow: 0 15px 40px rgba(0,0,0,.2);
-            animation: toastIn .3s ease;
-            max-width: 340px;
-        }
-
-        .toast.error {
-            background: #8f2929;
-        }
-
-        @keyframes toastIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* ========================================
-           LOADING
-        ======================================== */
-
-        .loading {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .spinner {
-            width: 14px;
-            height: 14px;
-            border: 2px solid #ccc;
-            border-top-color: currentColor;
-            border-radius: 50%;
-            animation: spin .7s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* ========================================
-           MOBILE
-        ======================================== */
-
-        .mobile-header {
-            display: none;
-        }
-
-        @media (max-width: 1100px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .section-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 760px) {
-            .sidebar {
-                transform: translateX(-100%);
-                transition: .25s ease;
-            }
-
-            .sidebar.mobile-open {
-                transform: translateX(0);
-            }
-
-            .main {
-                margin-left: 0;
-            }
-
-            .mobile-header {
-                display: flex;
-                height: 65px;
-                background: var(--black);
-                color: white;
-                padding: 0 17px;
-                align-items: center;
-                justify-content: space-between;
-            }
-
-            .mobile-menu {
-                border: 1px solid #333;
-                background: #111;
-                color: white;
-                border-radius: 9px;
-                width: 37px;
-                height: 37px;
-            }
-
-            .content {
-                padding: 20px 15px 50px;
-            }
-
-            .topbar {
-                display: none;
-            }
-
-            .hero {
-                padding: 28px 23px;
-                min-height: 250px;
-                border-radius: 19px;
-            }
-
-            .hero-date {
-                display: none;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 9px;
-            }
-
-            .stat-card {
-                min-height: 120px;
-                padding: 17px;
-            }
-
-            .stat-value {
-                font-size: 28px;
-                margin-top: 16px;
-            }
-
-            .quick-actions {
-                grid-template-columns: 1fr;
-            }
-
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .form-group.full {
-                grid-column: auto;
-            }
-
-            .detail-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .modal-overlay {
-                padding: 10px;
-            }
-
-            .modal {
-                max-height: 94vh;
-                border-radius: 17px;
-            }
-
-            .modal-body {
-                padding: 20px;
-            }
-
-            .profile-header {
-                margin: -20px -20px 20px;
-            }
-
-            .attendance-toolbar {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .attendance-date {
-                flex: auto;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Admin — Atelier Jeu d'Échecs Lezay</title>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --bg: #f5f5f3;
+      --surface: #ffffff;
+      --surface-2: #fafafa;
+      --text: #111111;
+      --muted: #777777;
+      --border: #e7e7e7;
+      --black: #111111;
+      --danger: #d9363e;
+      --danger-bg: #fff1f1;
+      --success: #17834b;
+      --success-bg: #edf9f2;
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.10);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    /* =========================
+       LAYOUT
+    ========================= */
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: #0d0d0d;
+      color: white;
+      padding: 26px 18px;
+      position: fixed;
+      inset: 0 auto 0 0;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 4px 10px 30px;
+    }
+
+    .brand img {
+      width: 45px;
+      height: 45px;
+      object-fit: contain;
+      background: white;
+      border-radius: 12px;
+      padding: 4px;
+    }
+
+    .brand-text strong {
+      display: block;
+      font-size: 14px;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-text span {
+      display: block;
+      margin-top: 3px;
+      color: #888;
+      font-size: 11px;
+    }
+
+    .sidebar-label {
+      color: #666;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .nav button {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: #aaa;
+      padding: 13px 12px;
+      border-radius: 11px;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      transition: .2s ease;
+    }
+
+    .nav button:hover,
+    .nav button.active {
+      background: #202020;
+      color: white;
+    }
+
+    .nav-icon {
+      width: 20px;
+      text-align: center;
+      font-size: 16px;
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+    }
+
+    .admin-card {
+      border: 1px solid #292929;
+      background: #171717;
+      padding: 14px;
+      border-radius: 14px;
+      margin-bottom: 10px;
+    }
+
+    .admin-card small {
+      color: #777;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .admin-card div {
+      margin-top: 5px;
+      font-size: 12px;
+      word-break: break-all;
+      color: #ddd;
+    }
+
+    .logout-btn {
+      width: 100%;
+      border: 1px solid #292929;
+      background: transparent;
+      color: #aaa;
+      padding: 12px;
+      border-radius: 11px;
+      transition: .2s;
+    }
+
+    .logout-btn:hover {
+      background: #252525;
+      color: white;
+    }
+
+    /* =========================
+       MAIN
+    ========================= */
+
+    .main {
+      margin-left: 260px;
+      width: calc(100% - 260px);
+      min-height: 100vh;
+    }
+
+    .topbar {
+      height: 78px;
+      padding: 0 38px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,.85);
+      backdrop-filter: blur(15px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .page-title h1 {
+      font-size: 21px;
+      letter-spacing: -0.04em;
+    }
+
+    .page-title p {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 3px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .mobile-menu {
+      display: none;
+    }
+
+    .content {
+      padding: 38px;
+      max-width: 1450px;
+      margin: auto;
+    }
+
+    /* =========================
+       DASHBOARD
+    ========================= */
+
+    .welcome {
+      margin-bottom: 28px;
+    }
+
+    .welcome h2 {
+      font-size: 32px;
+      letter-spacing: -0.05em;
+    }
+
+    .welcome p {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 25px;
+    }
+
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 23px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .stat-value {
+      font-size: 34px;
+      font-weight: 750;
+      letter-spacing: -0.06em;
+      margin-top: 8px;
+    }
+
+    .dashboard-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 21px 23px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-header h3 {
+      font-size: 15px;
+    }
+
+    .card-header span {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* =========================
+       BUTTONS
+    ========================= */
+
+    .btn {
+      border: 1px solid var(--border);
+      background: white;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 12px;
+      font-weight: 650;
+      transition: .2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      border-color: #bbb;
+    }
+
+    .btn-black {
+      background: var(--black);
+      color: white;
+      border-color: var(--black);
+    }
+
+    .btn-black:hover {
+      background: #292929;
+      border-color: #292929;
+    }
+
+    .btn-danger {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border-color: #ffd5d7;
+    }
+
+    .btn-small {
+      padding: 7px 10px;
+      font-size: 11px;
+    }
+
+    /* =========================
+       TABLE
+    ========================= */
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      text-align: left;
+      padding: 13px 20px;
+      color: #888;
+      font-size: 10px;
+      font-weight: 750;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 15px 20px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      vertical-align: middle;
+    }
+
+    tbody tr {
+      transition: .15s;
+    }
+
+    tbody tr:hover {
+      background: #fafafa;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .member-name {
+      font-weight: 700;
+    }
+
+    .member-id {
+      color: #aaa;
+      font-size: 10px;
+      margin-top: 3px;
+    }
+
+    .class-badge {
+      display: inline-flex;
+      padding: 5px 9px;
+      border-radius: 7px;
+      background: #f0f0f0;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .date {
+      color: #777;
+      font-size: 12px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+
+    .empty {
+      padding: 55px 20px;
+      text-align: center;
+      color: #888;
+    }
+
+    .empty strong {
+      display: block;
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    /* =========================
+       SEARCH
+    ========================= */
+
+    .members-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .search {
+      flex: 1;
+      position: relative;
+    }
+
+    .search input {
+      width: 100%;
+      height: 44px;
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 11px;
+      padding: 0 15px;
+      outline: none;
+      font-size: 13px;
+      transition: .2s;
+    }
+
+    .search input:focus {
+      border-color: #999;
+      box-shadow: 0 0 0 3px rgba(0,0,0,.04);
+    }
+
+    /* =========================
+       MODALS
+    ========================= */
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(7px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      animation: modalIn .18s ease;
+    }
+
+    .modal.large {
+      max-width: 700px;
+    }
+
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .modal-header {
+      padding: 22px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-header h2 {
+      font-size: 18px;
+      letter-spacing: -0.03em;
+    }
+
+    .close {
+      border: 0;
+      background: #f3f3f3;
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .modal-footer {
+      padding: 18px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* =========================
+       DETAILS
+    ========================= */
+
+    .detail-head {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .avatar {
+      width: 54px;
+      height: 54px;
+      border-radius: 15px;
+      background: #111;
+      color: white;
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .detail-head h3 {
+      font-size: 18px;
+    }
+
+    .detail-head p {
+      color: #888;
+      font-size: 12px;
+      margin-top: 3px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 13px;
+    }
+
+    .detail-item {
+      border: 1px solid var(--border);
+      background: #fafafa;
+      padding: 15px;
+      border-radius: 12px;
+    }
+
+    .detail-item.full {
+      grid-column: 1 / -1;
+    }
+
+    .detail-label {
+      color: #888;
+      font-size: 10px;
+      font-weight: 750;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .detail-value {
+      margin-top: 6px;
+      font-size: 13px;
+      word-break: break-word;
+    }
+
+    /* =========================
+       FORMS
+    ========================= */
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #555;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 12px;
+      outline: none;
+      background: white;
+      font-size: 13px;
+      transition: .2s;
+    }
+
+    .form-group textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      border-color: #999;
+      box-shadow: 0 0 0 3px rgba(0,0,0,.04);
+    }
+
+    /* =========================
+       DELETE
+    ========================= */
+
+    .delete-warning {
+      text-align: center;
+      padding: 8px 0 10px;
+    }
+
+    .warning-icon {
+      width: 55px;
+      height: 55px;
+      margin: 0 auto 15px;
+      display: grid;
+      place-items: center;
+      background: var(--danger-bg);
+      color: var(--danger);
+      border-radius: 50%;
+      font-size: 24px;
+    }
+
+    .delete-warning h3 {
+      font-size: 18px;
+      margin-bottom: 7px;
+    }
+
+    .delete-warning p {
+      color: #777;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    /* =========================
+       TOAST
+    ========================= */
+
+    .toast-container {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 300;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toast {
+      background: #111;
+      color: white;
+      padding: 13px 16px;
+      border-radius: 11px;
+      box-shadow: var(--shadow);
+      font-size: 12px;
+      animation: toastIn .2s ease;
+    }
+
+    .toast.error {
+      background: #b9252e;
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* =========================
+       LOADING
+    ========================= */
+
+    .loading {
+      padding: 45px;
+      text-align: center;
+      color: #888;
+      font-size: 13px;
+    }
+
+    .spinner {
+      width: 23px;
+      height: 23px;
+      border: 2px solid #ddd;
+      border-top-color: #111;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      margin: 0 auto 10px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 900px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: .25s;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main {
+        margin-left: 0;
+        width: 100%;
+      }
+
+      .mobile-menu {
+        display: block;
+        border: 0;
+        background: #f1f1f1;
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+      }
+
+      .topbar {
+        padding: 0 18px;
+      }
+
+      .content {
+        padding: 25px 18px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .form-grid,
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .detail-item.full {
+        grid-column: auto;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .topbar {
+        height: 68px;
+      }
+
+      .page-title p {
+        display: none;
+      }
+
+      .welcome h2 {
+        font-size: 27px;
+      }
+
+      .members-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .members-toolbar .btn {
+        width: 100%;
+      }
+
+      .actions .btn span {
+        display: none;
+      }
+
+      .modal {
+        border-radius: 16px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<!-- ==========================================
-     SIDEBAR
-========================================== -->
+<div class="app">
 
-<aside class="sidebar" id="sidebar">
+  <!-- =========================
+       SIDEBAR
+  ========================== -->
+  <aside class="sidebar" id="sidebar">
 
     <div class="brand">
-        <img
-            class="brand-logo"
-            src="https://image-namanhstudio.weebly.com/uploads/1/5/5/3/155356283/icon-echec-lezay_orig.png"
-            alt="Atelier jeu d'échecs Lezay">
+      <img
+        src="https://image-namanhstudio.weebly.com/uploads/1/5/5/3/155356283/icon-echec-lezay_orig.png"
+        alt="Logo Atelier Jeu d'Échecs Lezay"
+      />
 
-        <div class="brand-text">
-            <div class="brand-title">Atelier jeu d'échecs Lezay</div>
-            <div class="brand-subtitle">Administration</div>
-        </div>
+      <div class="brand-text">
+        <strong>Échecs Lezay</strong>
+        <span>Administration</span>
+      </div>
     </div>
 
-    <div class="nav-label">Navigation</div>
+    <div class="sidebar-label">Administration</div>
 
     <nav class="nav">
+      <button class="active" onclick="showDashboard()">
+        <span class="nav-icon">⌂</span>
+        Tableau de bord
+      </button>
 
-        <button class="nav-button active" data-action="dashboard">
-            <span class="nav-icon">⌂</span>
-            Tableau de bord
-        </button>
-
-        <button class="nav-button" data-action="students">
-            <span class="nav-icon">♟</span>
-            Élèves
-        </button>
-
-        <button class="nav-button" data-action="attendance">
-            <span class="nav-icon">✓</span>
-            Feuille d'appel
-        </button>
-
-        <button class="nav-button" data-action="news">
-            <span class="nav-icon">◌</span>
-            Actualités
-        </button>
-
-        <button class="nav-button" data-action="settings">
-            <span class="nav-icon">⚙</span>
-            Paramètres
-        </button>
-
+      <button onclick="openMembersModal()">
+        <span class="nav-icon">♟</span>
+        Membres
+      </button>
     </nav>
 
     <div class="sidebar-bottom">
 
-        <div class="user-box">
-            <div class="user-info">
-                <div class="avatar" id="userAvatar">A</div>
+      <div class="admin-card">
+        <small>Compte connecté</small>
+        <div id="adminEmail">Chargement...</div>
+      </div>
 
-                <div style="min-width:0">
-                    <div class="user-email" id="userEmail">
-                        Chargement...
-                    </div>
-                    <div class="user-role">
-                        Administrateur
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <button class="logout-button" id="logoutButton">
-            Se déconnecter
-        </button>
+      <button class="logout-btn" onclick="logout()">
+        Se déconnecter
+      </button>
 
     </div>
-
-</aside>
-
-
-<!-- ==========================================
-     MOBILE HEADER
-========================================== -->
-
-<header class="mobile-header">
-
-    <button class="mobile-menu" id="mobileMenu">
-        ☰
-    </button>
-
-    <div style="font-family:Manrope;font-weight:800;font-size:13px;">
-        Atelier Lezay
-    </div>
-
-    <div style="width:37px"></div>
-
-</header>
+  </aside>
 
 
-<!-- ==========================================
-     MAIN
-========================================== -->
-
-<main class="main">
+  <!-- =========================
+       MAIN
+  ========================== -->
+  <main class="main">
 
     <header class="topbar">
 
-        <div class="topbar-left">
-            <div class="topbar-kicker">
-                Administration
-            </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button
+          class="mobile-menu"
+          onclick="toggleSidebar()"
+          aria-label="Menu"
+        >
+          ☰
+        </button>
 
-            <div class="topbar-title">
-                Tableau de bord
-            </div>
+        <div class="page-title">
+          <h1>Administration</h1>
+          <p>Atelier Jeu d'Échecs Lezay</p>
         </div>
+      </div>
 
-        <div class="topbar-actions">
+      <div class="top-actions">
+        <button class="btn" onclick="refreshMembers()">
+          ↻ Actualiser
+        </button>
 
-            <button
-                class="icon-button"
-                title="Actualiser"
-                id="refreshButton">
-                ↻
-            </button>
-
-        </div>
+        <button class="btn btn-black" onclick="openMembersModal()">
+          Voir les membres
+        </button>
+      </div>
 
     </header>
 
 
-    <div class="content">
+    <section class="content">
 
-        <!-- HERO -->
+      <div class="welcome">
+        <h2>Bonjour 👋</h2>
+        <p>
+          Gérez simplement les membres inscrits au club.
+        </p>
+      </div>
 
-        <section class="hero">
 
-            <div class="hero-content">
+      <!-- STATS -->
+      <div class="stats">
 
-                <div class="hero-eyebrow">
-                    Atelier jeu d'échecs Lezay
-                </div>
-
-                <h1>
-                    Jouez.<br>
-                    Réfléchissez.<br>
-                    Progressez.
-                </h1>
-
-                <p>
-                    Gérez simplement les membres, les présences et
-                    les actualités du club depuis un seul espace.
-                </p>
-
-            </div>
-
-            <div class="hero-date" id="currentDate">
-                —
-            </div>
-
-        </section>
-
-
-        <!-- STATS -->
-
-        <section class="stats-grid">
-
-            <div class="stat-card">
-
-                <div class="stat-top">
-                    <div class="stat-label">
-                        Élèves inscrits
-                    </div>
-
-                    <div class="stat-icon">
-                        ♟
-                    </div>
-                </div>
-
-                <div class="stat-value" id="studentCount">
-                    —
-                </div>
-
-                <div class="stat-description">
-                    Membres actifs du club
-                </div>
-
-            </div>
-
-
-            <div class="stat-card">
-
-                <div class="stat-top">
-                    <div class="stat-label">
-                        Présents
-                    </div>
-
-                    <div class="stat-icon">
-                        ✓
-                    </div>
-                </div>
-
-                <div class="stat-value" id="presentCount">
-                    —
-                </div>
-
-                <div class="stat-description">
-                    Présences du dernier appel
-                </div>
-
-            </div>
-
-
-            <div class="stat-card">
-
-                <div class="stat-top">
-                    <div class="stat-label">
-                        Absences
-                    </div>
-
-                    <div class="stat-icon">
-                        !
-                    </div>
-                </div>
-
-                <div class="stat-value" id="absenceCount">
-                    —
-                </div>
-
-                <div class="stat-description">
-                    Absences enregistrées
-                </div>
-
-            </div>
-
-
-            <div class="stat-card">
-
-                <div class="stat-top">
-                    <div class="stat-label">
-                        Actualités
-                    </div>
-
-                    <div class="stat-icon">
-                        ◌
-                    </div>
-                </div>
-
-                <div class="stat-value" id="newsCount">
-                    —
-                </div>
-
-                <div class="stat-description">
-                    Publications créées
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- MAIN GRID -->
-
-        <section class="section-grid">
-
-            <!-- STUDENTS -->
-
-            <div class="panel">
-
-                <div class="panel-header">
-
-                    <div>
-                        <div class="panel-title">
-                            Élèves récents
-                        </div>
-
-                        <div class="panel-subtitle">
-                            Dernières inscriptions au club
-                        </div>
-                    </div>
-
-                    <button
-                        class="text-button"
-                        id="openStudentsButton">
-                        Voir tous
-                    </button>
-
-                </div>
-
-                <div class="table-wrap">
-
-                    <table>
-
-                        <thead>
-                            <tr>
-                                <th>Élève</th>
-                                <th>Classe</th>
-                                <th>Absences</th>
-                                <th>Inscription</th>
-                            </tr>
-                        </thead>
-
-                        <tbody id="recentStudents">
-                            <tr>
-                                <td colspan="4" class="empty">
-                                    Chargement...
-                                </td>
-                            </tr>
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </div>
-
-
-            <!-- QUICK ACTIONS -->
-
-            <div class="panel">
-
-                <div class="panel-header">
-
-                    <div>
-                        <div class="panel-title">
-                            Actions rapides
-                        </div>
-
-                        <div class="panel-subtitle">
-                            Gestion du club
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="quick-actions">
-
-                    <button
-                        class="quick-action"
-                        data-action="add-student">
-
-                        <div class="quick-action-icon">
-                            ＋
-                        </div>
-
-                        <div class="quick-action-title">
-                            Ajouter un élève
-                        </div>
-
-                        <div class="quick-action-description">
-                            Ajouter manuellement un membre.
-                        </div>
-
-                    </button>
-
-
-                    <button
-                        class="quick-action"
-                        data-action="attendance">
-
-                        <div class="quick-action-icon">
-                            ✓
-                        </div>
-
-                        <div class="quick-action-title">
-                            Faire l'appel
-                        </div>
-
-                        <div class="quick-action-description">
-                            Enregistrer les présences du jour.
-                        </div>
-
-                    </button>
-
-
-                    <button
-                        class="quick-action"
-                        data-action="news">
-
-                        <div class="quick-action-icon">
-                            +
-                        </div>
-
-                        <div class="quick-action-title">
-                            Créer une actualité
-                        </div>
-
-                        <div class="quick-action-description">
-                            Préparer une nouvelle publication.
-                        </div>
-
-                    </button>
-
-
-                    <button
-                        class="quick-action"
-                        data-action="settings">
-
-                        <div class="quick-action-icon">
-                            ⚙
-                        </div>
-
-                        <div class="quick-action-title">
-                            Paramètres
-                        </div>
-
-                        <div class="quick-action-description">
-                            Informations et configuration.
-                        </div>
-
-                    </button>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- NEWS -->
-
-        <section class="panel">
-
-            <div class="panel-header">
-
-                <div>
-                    <div class="panel-title">
-                        Actualités récentes
-                    </div>
-
-                    <div class="panel-subtitle">
-                        Publications de l'administration
-                    </div>
-                </div>
-
-                <button
-                    class="text-button"
-                    data-action="news">
-                    Gérer
-                </button>
-
-            </div>
-
-            <div class="news-list" id="recentNews">
-
-                <div class="empty">
-                    Chargement...
-                </div>
-
-            </div>
-
-        </section>
-
-    </div>
-
-</main>
-
-
-<!-- ==========================================
-     MODAL : ÉLÈVES
-========================================== -->
-
-<div class="modal-overlay" id="studentsModal">
-
-    <div class="modal large">
-
-        <div class="modal-header">
-
-            <div>
-                <div class="modal-title">
-                    Élèves
-                </div>
-
-                <div class="modal-description">
-                    Gestion des membres de l'Atelier jeu d'échecs Lezay
-                </div>
-            </div>
-
-            <button class="close-modal" data-close="studentsModal">
-                ×
-            </button>
-
+        <div class="stat">
+          <div class="stat-label">Membres inscrits</div>
+          <div class="stat-value" id="totalMembers">—</div>
         </div>
 
-
-        <div class="modal-body">
-
-            <div style="display:flex;gap:10px;margin-bottom:20px;">
-
-                <input
-                    type="search"
-                    class="form-input"
-                    id="studentSearch"
-                    placeholder="Rechercher un prénom, nom ou classe...">
-
-                <button
-                    class="button button-dark"
-                    data-action="add-student"
-                    style="white-space:nowrap;">
-                    + Ajouter
-                </button>
-
-            </div>
-
-
-            <div class="table-wrap">
-
-                <table>
-
-                    <thead>
-                        <tr>
-                            <th>Élève</th>
-                            <th>Classe</th>
-                            <th>Email</th>
-                            <th>Absences</th>
-                            <th>Inscription</th>
-                        </tr>
-                    </thead>
-
-                    <tbody id="allStudents">
-                        <tr>
-                            <td colspan="5" class="empty">
-                                Chargement...
-                            </td>
-                        </tr>
-                    </tbody>
-
-                </table>
-
-            </div>
-
+        <div class="stat">
+          <div class="stat-label">Dernière inscription</div>
+          <div class="stat-value" id="latestRegistration">—</div>
         </div>
 
-    </div>
+        <div class="stat">
+          <div class="stat-label">Statut</div>
+          <div
+            class="stat-value"
+            style="font-size:21px;"
+            id="connectionStatus"
+          >
+            Connexion...
+          </div>
+        </div>
+
+      </div>
+
+
+      <!-- RECENT MEMBERS -->
+      <div class="dashboard-card">
+
+        <div class="card-header">
+          <div>
+            <h3>Derniers membres inscrits</h3>
+            <span>Les inscriptions les plus récentes</span>
+          </div>
+
+          <button
+            class="btn btn-small"
+            onclick="openMembersModal()"
+          >
+            Tout voir
+          </button>
+        </div>
+
+        <div id="recentMembersContainer">
+          <div class="loading">
+            <div class="spinner"></div>
+            Chargement des membres...
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
 
 </div>
 
 
-<!-- ==========================================
-     MODAL : ADD STUDENT
-========================================== -->
+<!-- ==================================================
+     MEMBERS MODAL
+================================================== -->
 
-<div class="modal-overlay" id="addStudentModal">
+<div class="modal-overlay" id="membersModal">
 
-    <div class="modal small">
+  <div class="modal large">
 
-        <div class="modal-header">
+    <div class="modal-header">
+      <div>
+        <h2>Membres</h2>
+        <div style="font-size:11px;color:#888;margin-top:3px;">
+          Liste complète des inscrits
+        </div>
+      </div>
 
-            <div>
-                <div class="modal-title">
-                    Ajouter un élève
-                </div>
+      <button class="close" onclick="closeModal('membersModal')">
+        ×
+      </button>
+    </div>
 
-                <div class="modal-description">
-                    Ajouter un membre au club
-                </div>
-            </div>
+    <div class="modal-body">
 
-            <button class="close-modal" data-close="addStudentModal">
-                ×
-            </button>
+      <div class="members-toolbar">
 
+        <div class="search">
+          <input
+            type="search"
+            id="searchInput"
+            placeholder="Rechercher par nom, prénom ou classe..."
+            oninput="filterMembers()"
+          />
         </div>
 
+        <button class="btn" onclick="refreshMembers()">
+          ↻ Actualiser
+        </button>
 
-        <form id="addStudentForm">
+      </div>
 
-            <div class="modal-body">
-
-                <div class="form-grid">
-
-                    <div class="form-group">
-
-                        <label class="form-label">
-                            Prénom *
-                        </label>
-
-                        <input
-                            class="form-input"
-                            name="first_name"
-                            required
-                            placeholder="Prénom">
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label class="form-label">
-                            Nom
-                        </label>
-
-                        <input
-                            class="form-input"
-                            name="last_name"
-                            placeholder="Nom">
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label class="form-label">
-                            Classe *
-                        </label>
-
-                        <input
-                            class="form-input"
-                            name="class_name"
-                            required
-                            placeholder="Ex. 5e2">
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label class="form-label">
-                            Email
-                        </label>
-
-                        <input
-                            type="email"
-                            class="form-input"
-                            name="email"
-                            placeholder="facultatif">
-
-                    </div>
-
-
-                    <div class="form-group full">
-
-                        <label class="form-label">
-                            Message
-                        </label>
-
-                        <textarea
-                            class="form-textarea"
-                            name="message"
-                            placeholder="Informations complémentaires..."></textarea>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="modal-footer">
-
-                <button
-                    type="button"
-                    class="button button-light"
-                    data-close="addStudentModal">
-                    Annuler
-                </button>
-
-                <button
-                    type="submit"
-                    class="button button-dark"
-                    id="addStudentSubmit">
-                    Ajouter l'élève
-                </button>
-
-            </div>
-
-        </form>
+      <div id="membersTableContainer">
+        <div class="loading">
+          <div class="spinner"></div>
+          Chargement...
+        </div>
+      </div>
 
     </div>
+
+  </div>
 
 </div>
 
 
-<!-- ==========================================
-     MODAL : STUDENT DETAIL
-========================================== -->
+<!-- ==================================================
+     DETAIL MODAL
+================================================== -->
 
-<div class="modal-overlay" id="studentDetailModal">
+<div class="modal-overlay" id="detailModal">
 
-    <div class="modal">
+  <div class="modal">
 
-        <div class="modal-header">
+    <div class="modal-header">
 
-            <div>
-                <div class="modal-title">
-                    Fiche élève
-                </div>
+      <div>
+        <h2>Détails du membre</h2>
+      </div>
 
-                <div class="modal-description">
-                    Informations et suivi
-                </div>
-            </div>
-
-            <button class="close-modal" data-close="studentDetailModal">
-                ×
-            </button>
-
-        </div>
-
-
-        <div class="modal-body" id="studentDetailBody">
-
-            <!-- généré par JS -->
-
-        </div>
-
-
-        <div class="modal-footer">
-
-            <button
-                class="button button-danger"
-                id="deleteStudentButton">
-                Supprimer
-            </button>
-
-            <button
-                class="button button-light"
-                data-close="studentDetailModal">
-                Fermer
-            </button>
-
-        </div>
+      <button class="close" onclick="closeModal('detailModal')">
+        ×
+      </button>
 
     </div>
+
+    <div class="modal-body" id="detailContent">
+      <!-- Dynamically generated -->
+    </div>
+
+    <div class="modal-footer">
+
+      <button
+        class="btn"
+        onclick="closeModal('detailModal')"
+      >
+        Fermer
+      </button>
+
+      <button
+        class="btn btn-black"
+        onclick="editCurrentMember()"
+      >
+        Modifier
+      </button>
+
+      <button
+        class="btn btn-danger"
+        onclick="deleteCurrentMember()"
+      >
+        Supprimer
+      </button>
+
+    </div>
+
+  </div>
 
 </div>
 
 
-<!-- ==========================================
-     MODAL : ATTENDANCE
-========================================== -->
+<!-- ==================================================
+     EDIT MODAL
+================================================== -->
 
-<div class="modal-overlay" id="attendanceModal">
+<div class="modal-overlay" id="editModal">
 
-    <div class="modal large">
+  <div class="modal">
 
-        <div class="modal-header">
+    <div class="modal-header">
 
-            <div>
-                <div class="modal-title">
-                    Feuille d'appel
-                </div>
-
-                <div class="modal-description">
-                    Enregistrer les présences des élèves
-                </div>
-            </div>
-
-            <button class="close-modal" data-close="attendanceModal">
-                ×
-            </button>
-
+      <div>
+        <h2>Modifier le membre</h2>
+        <div style="font-size:11px;color:#888;margin-top:3px;">
+          Modifiez les informations puis enregistrez.
         </div>
+      </div>
 
-
-        <div class="modal-body">
-
-            <div class="attendance-toolbar">
-
-                <div class="attendance-date">
-
-                    <label class="form-label">
-                        Date
-                    </label>
-
-                    <input
-                        type="date"
-                        class="form-input"
-                        id="attendanceDate">
-
-                </div>
-
-                <button
-                    class="button button-dark"
-                    id="loadAttendanceButton">
-                    Charger
-                </button>
-
-            </div>
-
-
-            <div class="table-wrap">
-
-                <table class="attendance-table">
-
-                    <thead>
-                        <tr>
-                            <th>Élève</th>
-                            <th>Classe</th>
-                            <th>Présence</th>
-                        </tr>
-                    </thead>
-
-                    <tbody id="attendanceList">
-
-                        <tr>
-                            <td colspan="3" class="empty">
-                                Sélectionnez une date.
-                            </td>
-                        </tr>
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
-
-        <div class="modal-footer">
-
-            <button
-                class="button button-light"
-                data-close="attendanceModal">
-                Annuler
-            </button>
-
-            <button
-                class="button button-dark"
-                id="saveAttendanceButton">
-                Enregistrer l'appel
-            </button>
-
-        </div>
+      <button class="close" onclick="closeModal('editModal')">
+        ×
+      </button>
 
     </div>
+
+    <form id="editForm" onsubmit="saveMember(event)">
+
+      <div class="modal-body">
+
+        <div class="form-grid">
+
+          <div class="form-group">
+            <label for="editFirstName">Prénom</label>
+            <input
+              id="editFirstName"
+              type="text"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="editLastName">Nom</label>
+            <input
+              id="editLastName"
+              type="text"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="editClass">Classe</label>
+            <input
+              id="editClass"
+              type="text"
+              required
+              placeholder="Ex : 5e B"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="editEmail">Email</label>
+            <input
+              id="editEmail"
+              type="email"
+              placeholder="email@example.com"
+            />
+          </div>
+
+          <div class="form-group full">
+            <label for="editMessage">Message</label>
+            <textarea
+              id="editMessage"
+              placeholder="Message ou informations complémentaires..."
+            ></textarea>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+
+        <button
+          type="button"
+          class="btn"
+          onclick="closeModal('editModal')"
+        >
+          Annuler
+        </button>
+
+        <button
+          type="submit"
+          class="btn btn-black"
+          id="saveButton"
+        >
+          Enregistrer
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
 
 </div>
 
 
-<!-- ==========================================
-     MODAL : NEWS
-========================================== -->
+<!-- ==================================================
+     DELETE MODAL
+================================================== -->
 
-<div class="modal-overlay" id="newsModal">
+<div class="modal-overlay" id="deleteModal">
 
-    <div class="modal large">
+  <div class="modal" style="max-width:430px;">
 
-        <div class="modal-header">
+    <div class="modal-header">
+      <h2>Supprimer le membre</h2>
 
-            <div>
-                <div class="modal-title">
-                    Actualités
-                </div>
+      <button class="close" onclick="closeModal('deleteModal')">
+        ×
+      </button>
+    </div>
 
-                <div class="modal-description">
-                    Gérer les publications du club
-                </div>
-            </div>
+    <div class="modal-body">
 
-            <button class="close-modal" data-close="newsModal">
-                ×
-            </button>
+      <div class="delete-warning">
 
+        <div class="warning-icon">
+          !
         </div>
 
+        <h3>Êtes-vous sûr ?</h3>
 
-        <div class="modal-body">
+        <p>
+          Vous êtes sur le point de supprimer
+          <strong id="deleteMemberName"></strong>.
+          Cette action est définitive.
+        </p>
 
-            <div style="display:flex;justify-content:flex-end;margin-bottom:18px;">
-
-                <button
-                    class="button button-dark"
-                    id="newNewsButton">
-                    + Nouvelle actualité
-                </button>
-
-            </div>
-
-            <div id="newsManagerList">
-
-                <div class="empty">
-                    Chargement...
-                </div>
-
-            </div>
-
-        </div>
+      </div>
 
     </div>
 
-</div>
+    <div class="modal-footer">
 
+      <button
+        class="btn"
+        onclick="closeModal('deleteModal')"
+      >
+        Annuler
+      </button>
 
-<!-- ==========================================
-     MODAL : NEWS EDITOR
-========================================== -->
-
-<div class="modal-overlay" id="newsEditorModal">
-
-    <div class="modal">
-
-        <div class="modal-header">
-
-            <div>
-                <div class="modal-title" id="newsEditorTitle">
-                    Nouvelle actualité
-                </div>
-
-                <div class="modal-description">
-                    Préparer une publication
-                </div>
-            </div>
-
-            <button class="close-modal" data-close="newsEditorModal">
-                ×
-            </button>
-
-        </div>
-
-
-        <form id="newsForm">
-
-            <div class="modal-body">
-
-                <input type="hidden" id="newsId">
-
-                <div class="form-group">
-
-                    <label class="form-label">
-                        Titre *
-                    </label>
-
-                    <input
-                        class="form-input"
-                        id="newsTitle"
-                        required
-                        placeholder="Titre de l'actualité">
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label class="form-label">
-                        Contenu *
-                    </label>
-
-                    <textarea
-                        class="form-textarea"
-                        id="newsContent"
-                        required
-                        style="min-height:240px"
-                        placeholder="Contenu de l'actualité..."></textarea>
-
-                </div>
-
-
-                <div class="setting-row">
-
-                    <div>
-                        <div class="setting-title">
-                            Publier immédiatement
-                        </div>
-
-                        <div class="setting-description">
-                            Rendre cette actualité visible sur le site.
-                        </div>
-                    </div>
-
-                    <input
-                        type="checkbox"
-                        id="newsPublished">
-
-                </div>
-
-            </div>
-
-
-            <div class="modal-footer">
-
-                <button
-                    type="button"
-                    class="button button-light"
-                    data-close="newsEditorModal">
-                    Annuler
-                </button>
-
-                <button
-                    type="submit"
-                    class="button button-dark"
-                    id="saveNewsButton">
-                    Enregistrer
-                </button>
-
-            </div>
-
-        </form>
+      <button
+        class="btn btn-danger"
+        id="confirmDeleteButton"
+        onclick="confirmDelete()"
+      >
+        Supprimer définitivement
+      </button>
 
     </div>
 
-</div>
-
-
-<!-- ==========================================
-     MODAL : SETTINGS
-========================================== -->
-
-<div class="modal-overlay" id="settingsModal">
-
-    <div class="modal small">
-
-        <div class="modal-header">
-
-            <div>
-                <div class="modal-title">
-                    Paramètres
-                </div>
-
-                <div class="modal-description">
-                    Informations de l'administration
-                </div>
-            </div>
-
-            <button class="close-modal" data-close="settingsModal">
-                ×
-            </button>
-
-        </div>
-
-
-        <div class="modal-body">
-
-            <div class="setting-row">
-
-                <div>
-                    <div class="setting-title">
-                        Club
-                    </div>
-
-                    <div class="setting-description">
-                        Atelier jeu d'échecs Lezay
-                    </div>
-                </div>
-
-            </div>
-
-
-            <div class="setting-row">
-
-                <div>
-                    <div class="setting-title">
-                        Établissement
-                    </div>
-
-                    <div class="setting-description">
-                        Collège Lezay Marnésia
-                    </div>
-                </div>
-
-            </div>
-
-
-            <div class="setting-row">
-
-                <div>
-                    <div class="setting-title">
-                        Salle
-                    </div>
-
-                    <div class="setting-description">
-                        Salle A25
-                    </div>
-                </div>
-
-            </div>
-
-
-            <div class="setting-row">
-
-                <div>
-                    <div class="setting-title">
-                        Niveau
-                    </div>
-
-                    <div class="setting-description">
-                        6e → 3e
-                    </div>
-                </div>
-
-            </div>
-
-
-            <div class="setting-row">
-
-                <div>
-                    <div class="setting-title">
-                        Compte connecté
-                    </div>
-
-                    <div
-                        class="setting-description"
-                        id="settingsEmail">
-                        —
-                    </div>
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div class="modal-footer">
-
-            <button
-                class="button button-light"
-                data-close="settingsModal">
-                Fermer
-            </button>
-
-        </div>
-
-    </div>
+  </div>
 
 </div>
 
 
 <!-- TOAST -->
-
 <div class="toast-container" id="toastContainer"></div>
 
 
 <script>
-/* ==========================================================
-   SUPABASE
-========================================================== */
+/* =====================================================
+   SUPABASE CONFIG
+===================================================== */
 
 const SUPABASE_URL =
-    "https://mulwdqtyojndrjbpgldk.supabase.co";
+  "https://mulwdqtyojndrjbpgldk.supabase.co";
 
 const SUPABASE_KEY =
-    "sb_publishable_AdZl_u0YAK2xSiv3pX74iA_Q2GMnIwz";
+  "sb_publishable_AdZl_u0YAK2xSiv3pX74iA_Q2GMnIwz";
 
 const supabaseClient =
-    window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-    );
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
 
-/* ==========================================================
-   STATE
-========================================================== */
+/* =====================================================
+   GLOBAL STATE
+===================================================== */
 
-let currentUser = null;
-let students = [];
-let currentStudent = null;
-let attendanceState = {};
-let editingNewsId = null;
+let members = [];
+let filteredMembers = [];
+let currentMember = null;
+let memberToDelete = null;
 
 
-/* ==========================================================
-   HELPERS
-========================================================== */
+/* =====================================================
+   INIT
+===================================================== */
 
-function $(selector) {
-    return document.querySelector(selector);
-}
+document.addEventListener("DOMContentLoaded", async () => {
 
-function $$(selector) {
-    return document.querySelectorAll(selector);
-}
+  await checkAuth();
 
-function escapeHTML(value) {
+  setupRealtime();
 
-    if (value === null || value === undefined) {
-        return "";
+});
+
+
+/* =====================================================
+   AUTH
+===================================================== */
+
+async function checkAuth() {
+
+  try {
+
+    const {
+      data: { session },
+      error
+    } = await supabaseClient.auth.getSession();
+
+    if (error) {
+      throw error;
     }
 
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+    if (!session) {
+
+      window.location.href = "login.html";
+
+      return;
+    }
+
+    document.getElementById("adminEmail").textContent =
+      session.user.email || "Administrateur";
+
+    document.getElementById("connectionStatus").textContent =
+      "Connecté";
+
+    await loadMembers();
+
+  } catch (error) {
+
+    console.error(error);
+
+    showToast(
+      "Impossible de vérifier la connexion.",
+      true
+    );
+
+    document.getElementById("connectionStatus").textContent =
+      "Erreur";
+
+  }
+
 }
 
 
-function formatDate(date) {
+/* =====================================================
+   LOAD MEMBERS
+===================================================== */
 
-    if (!date) return "—";
+async function loadMembers() {
 
-    return new Intl.DateTimeFormat(
-        "fr-FR",
-        {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric"
-        }
-    ).format(new Date(date));
+  const container =
+    document.getElementById("recentMembersContainer");
+
+  container.innerHTML = `
+    <div class="loading">
+      <div class="spinner"></div>
+      Chargement des membres...
+    </div>
+  `;
+
+  try {
+
+    const {
+      data,
+      error
+    } = await supabaseClient
+      .from("students")
+      .select("*")
+      .order("registered_at", {
+        ascending: false
+      });
+
+    if (error) {
+      throw error;
+    }
+
+    members = data || [];
+    filteredMembers = [...members];
+
+    updateStats();
+    renderRecentMembers();
+    renderMembersTable();
+
+  } catch (error) {
+
+    console.error(error);
+
+    container.innerHTML = `
+      <div class="empty">
+        <strong>Impossible de charger les membres</strong>
+        <span>${escapeHtml(error.message)}</span>
+      </div>
+    `;
+
+    document.getElementById("membersTableContainer").innerHTML = `
+      <div class="empty">
+        <strong>Erreur de chargement</strong>
+        <span>${escapeHtml(error.message)}</span>
+      </div>
+    `;
+
+  }
+
 }
 
 
-function formatLongDate(date) {
+/* =====================================================
+   STATS
+===================================================== */
 
-    return new Intl.DateTimeFormat(
-        "fr-FR",
-        {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-            year: "numeric"
-        }
-    ).format(date);
+function updateStats() {
+
+  document.getElementById("totalMembers").textContent =
+    members.length;
+
+  if (members.length > 0) {
+
+    const latest = members[0];
+
+    document.getElementById("latestRegistration").textContent =
+      formatDateShort(latest.registered_at);
+
+  } else {
+
+    document.getElementById("latestRegistration").textContent =
+      "—";
+
+  }
+
 }
 
 
-function initials(firstName, lastName) {
+/* =====================================================
+   RECENT MEMBERS
+===================================================== */
 
-    const first =
-        firstName?.trim()?.charAt(0) || "";
+function renderRecentMembers() {
 
-    const last =
-        lastName?.trim()?.charAt(0) || "";
+  const container =
+    document.getElementById("recentMembersContainer");
 
-    return (first + last).toUpperCase() || "?";
+  if (!members.length) {
+
+    container.innerHTML = `
+      <div class="empty">
+        <strong>Aucun membre</strong>
+        <span>Les nouvelles inscriptions apparaîtront ici.</span>
+      </div>
+    `;
+
+    return;
+  }
+
+  const recent = members.slice(0, 8);
+
+  container.innerHTML = `
+    <div class="table-wrap">
+      <table>
+
+        <thead>
+          <tr>
+            <th>Membre</th>
+            <th>Classe</th>
+            <th>Email</th>
+            <th>Inscription</th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          ${recent.map(member => `
+            <tr>
+
+              <td>
+                <div class="member-name">
+                  ${escapeHtml(fullName(member))}
+                </div>
+
+                <div class="member-id">
+                  ${escapeHtml(member.id)}
+                </div>
+              </td>
+
+              <td>
+                <span class="class-badge">
+                  ${escapeHtml(member.class_name || "—")}
+                </span>
+              </td>
+
+              <td>
+                ${escapeHtml(member.email || "—")}
+              </td>
+
+              <td>
+                <span class="date">
+                  ${formatDate(member.registered_at)}
+                </span>
+              </td>
+
+              <td>
+                <div class="actions">
+                  <button
+                    class="btn btn-small"
+                    onclick="viewMember('${member.id}')"
+                  >
+                    Voir
+                  </button>
+                </div>
+              </td>
+
+            </tr>
+          `).join("")}
+
+        </tbody>
+
+      </table>
+    </div>
+  `;
+
 }
 
 
-function showToast(message, type = "success") {
+/* =====================================================
+   MEMBERS TABLE
+===================================================== */
 
-    const container = $("#toastContainer");
+function renderMembersTable() {
 
-    const toast = document.createElement("div");
+  const container =
+    document.getElementById("membersTableContainer");
 
-    toast.className =
-        "toast" + (type === "error" ? " error" : "");
+  if (!filteredMembers.length) {
 
-    toast.textContent = message;
+    container.innerHTML = `
+      <div class="empty">
+        <strong>Aucun membre trouvé</strong>
+        <span>
+          Essayez avec un autre nom, prénom ou classe.
+        </span>
+      </div>
+    `;
 
-    container.appendChild(toast);
+    return;
+  }
 
-    setTimeout(() => {
-        toast.remove();
-    }, 3500);
+  container.innerHTML = `
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Membre</th>
+            <th>Classe</th>
+            <th>Email</th>
+            <th>Inscription</th>
+            <th style="text-align:right;">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          ${filteredMembers.map(member => `
+
+            <tr>
+
+              <td>
+                <div class="member-name">
+                  ${escapeHtml(fullName(member))}
+                </div>
+
+                <div class="member-id">
+                  ID : ${escapeHtml(member.id)}
+                </div>
+              </td>
+
+              <td>
+                <span class="class-badge">
+                  ${escapeHtml(member.class_name || "—")}
+                </span>
+              </td>
+
+              <td>
+                ${escapeHtml(member.email || "—")}
+              </td>
+
+              <td>
+                <span class="date">
+                  ${formatDate(member.registered_at)}
+                </span>
+              </td>
+
+              <td>
+
+                <div class="actions">
+
+                  <button
+                    class="btn btn-small"
+                    onclick="viewMember('${member.id}')"
+                  >
+                    Voir
+                  </button>
+
+                  <button
+                    class="btn btn-small"
+                    onclick="editMember('${member.id}')"
+                  >
+                    Modifier
+                  </button>
+
+                  <button
+                    class="btn btn-danger btn-small"
+                    onclick="askDelete('${member.id}')"
+                  >
+                    Supprimer
+                  </button>
+
+                </div>
+
+              </td>
+
+            </tr>
+
+          `).join("")}
+
+        </tbody>
+
+      </table>
+
+    </div>
+  `;
+
 }
 
 
-/* ==========================================================
+/* =====================================================
+   SEARCH
+===================================================== */
+
+function filterMembers() {
+
+  const query =
+    document
+      .getElementById("searchInput")
+      .value
+      .toLowerCase()
+      .trim();
+
+  if (!query) {
+
+    filteredMembers = [...members];
+
+  } else {
+
+    filteredMembers =
+      members.filter(member => {
+
+        const searchable = [
+          member.first_name,
+          member.last_name,
+          member.class_name,
+          member.email
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        return searchable.includes(query);
+
+      });
+
+  }
+
+  renderMembersTable();
+
+}
+
+
+/* =====================================================
+   OPEN MEMBERS MODAL
+===================================================== */
+
+function openMembersModal() {
+
+  document
+    .getElementById("membersModal")
+    .classList.add("open");
+
+  document.body.style.overflow = "hidden";
+
+  document.getElementById("searchInput").value = "";
+
+  filteredMembers = [...members];
+
+  renderMembersTable();
+
+}
+
+
+/* =====================================================
+   VIEW MEMBER
+===================================================== */
+
+function viewMember(id) {
+
+  const member =
+    members.find(item => item.id === id);
+
+  if (!member) return;
+
+  currentMember = member;
+
+  const initials =
+    `${member.first_name?.[0] || ""}${member.last_name?.[0] || ""}`
+      .toUpperCase();
+
+  document.getElementById("detailContent").innerHTML = `
+
+    <div class="detail-head">
+
+      <div class="avatar">
+        ${escapeHtml(initials || "♟")}
+      </div>
+
+      <div>
+        <h3>
+          ${escapeHtml(fullName(member))}
+        </h3>
+
+        <p>
+          ${escapeHtml(member.class_name || "Classe non renseignée")}
+        </p>
+      </div>
+
+    </div>
+
+
+    <div class="detail-grid">
+
+      <div class="detail-item">
+
+        <div class="detail-label">
+          Prénom
+        </div>
+
+        <div class="detail-value">
+          ${escapeHtml(member.first_name || "—")}
+        </div>
+
+      </div>
+
+
+      <div class="detail-item">
+
+        <div class="detail-label">
+          Nom
+        </div>
+
+        <div class="detail-value">
+          ${escapeHtml(member.last_name || "—")}
+        </div>
+
+      </div>
+
+
+      <div class="detail-item">
+
+        <div class="detail-label">
+          Classe
+        </div>
+
+        <div class="detail-value">
+          ${escapeHtml(member.class_name || "—")}
+        </div>
+
+      </div>
+
+
+      <div class="detail-item">
+
+        <div class="detail-label">
+          Email
+        </div>
+
+        <div class="detail-value">
+          ${escapeHtml(member.email || "—")}
+        </div>
+
+      </div>
+
+
+      <div class="detail-item full">
+
+        <div class="detail-label">
+          Date d'inscription
+        </div>
+
+        <div class="detail-value">
+          ${formatDate(member.registered_at)}
+        </div>
+
+      </div>
+
+
+      <div class="detail-item full">
+
+        <div class="detail-label">
+          Message
+        </div>
+
+        <div class="detail-value">
+          ${escapeHtml(member.message || "Aucun message.")}
+        </div>
+
+      </div>
+
+
+      <div class="detail-item full">
+
+        <div class="detail-label">
+          Identifiant
+        </div>
+
+        <div
+          class="detail-value"
+          style="font-family:monospace;font-size:11px;"
+        >
+          ${escapeHtml(member.id)}
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+
+  closeModal("membersModal");
+
+  openModal("detailModal");
+
+}
+
+
+/* =====================================================
+   EDIT
+===================================================== */
+
+function editMember(id) {
+
+  const member =
+    members.find(item => item.id === id);
+
+  if (!member) return;
+
+  currentMember = member;
+
+  document.getElementById("editFirstName").value =
+    member.first_name || "";
+
+  document.getElementById("editLastName").value =
+    member.last_name || "";
+
+  document.getElementById("editClass").value =
+    member.class_name || "";
+
+  document.getElementById("editEmail").value =
+    member.email || "";
+
+  document.getElementById("editMessage").value =
+    member.message || "";
+
+  closeModal("membersModal");
+
+  openModal("editModal");
+
+}
+
+
+function editCurrentMember() {
+
+  if (!currentMember) return;
+
+  closeModal("detailModal");
+
+  editMember(currentMember.id);
+
+}
+
+
+/* =====================================================
+   SAVE EDIT
+===================================================== */
+
+async function saveMember(event) {
+
+  event.preventDefault();
+
+  if (!currentMember) return;
+
+  const button =
+    document.getElementById("saveButton");
+
+  button.disabled = true;
+  button.textContent = "Enregistrement...";
+
+  const updatedData = {
+
+    first_name:
+      document.getElementById("editFirstName").value.trim(),
+
+    last_name:
+      document.getElementById("editLastName").value.trim(),
+
+    class_name:
+      document.getElementById("editClass").value.trim(),
+
+    email:
+      document.getElementById("editEmail").value.trim() || null,
+
+    message:
+      document.getElementById("editMessage").value.trim() || null
+
+  };
+
+  try {
+
+    const {
+      error
+    } = await supabaseClient
+      .from("students")
+      .update(updatedData)
+      .eq("id", currentMember.id);
+
+    if (error) {
+      throw error;
+    }
+
+    showToast("Membre modifié avec succès.");
+
+    closeModal("editModal");
+
+    await loadMembers();
+
+    currentMember = null;
+
+  } catch (error) {
+
+    console.error(error);
+
+    showToast(
+      "Erreur lors de la modification : " + error.message,
+      true
+    );
+
+  } finally {
+
+    button.disabled = false;
+    button.textContent = "Enregistrer";
+
+  }
+
+}
+
+
+/* =====================================================
+   DELETE
+===================================================== */
+
+function askDelete(id) {
+
+  const member =
+    members.find(item => item.id === id);
+
+  if (!member) return;
+
+  memberToDelete = member;
+
+  document.getElementById("deleteMemberName")
+    .textContent = fullName(member);
+
+  closeModal("membersModal");
+  closeModal("detailModal");
+
+  openModal("deleteModal");
+
+}
+
+
+function deleteCurrentMember() {
+
+  if (!currentMember) return;
+
+  askDelete(currentMember.id);
+
+}
+
+
+async function confirmDelete() {
+
+  if (!memberToDelete) return;
+
+  const button =
+    document.getElementById("confirmDeleteButton");
+
+  button.disabled = true;
+  button.textContent = "Suppression...";
+
+  try {
+
+    const {
+      error
+    } = await supabaseClient
+      .from("students")
+      .delete()
+      .eq("id", memberToDelete.id);
+
+    if (error) {
+      throw error;
+    }
+
+    showToast("Membre supprimé.");
+
+    closeModal("deleteModal");
+
+    await loadMembers();
+
+    memberToDelete = null;
+    currentMember = null;
+
+  } catch (error) {
+
+    console.error(error);
+
+    showToast(
+      "Erreur lors de la suppression : " + error.message,
+      true
+    );
+
+  } finally {
+
+    button.disabled = false;
+    button.textContent = "Supprimer définitivement";
+
+  }
+
+}
+
+
+/* =====================================================
+   REFRESH
+===================================================== */
+
+async function refreshMembers() {
+
+  await loadMembers();
+
+  showToast("Liste actualisée.");
+
+}
+
+
+/* =====================================================
    MODALS
-========================================================== */
+===================================================== */
 
 function openModal(id) {
 
-    const modal = document.getElementById(id);
+  document
+    .getElementById(id)
+    .classList.add("open");
 
-    if (!modal) return;
+  document.body.style.overflow = "hidden";
 
-    modal.classList.add("open");
-
-    document.body.style.overflow = "hidden";
 }
 
 
 function closeModal(id) {
 
-    const modal = document.getElementById(id);
+  document
+    .getElementById(id)
+    .classList.remove("open");
 
-    if (!modal) return;
+  const anyOpen =
+    document.querySelector(".modal-overlay.open");
 
-    modal.classList.remove("open");
-
-    if (!document.querySelector(".modal-overlay.open")) {
-        document.body.style.overflow = "";
-    }
-}
-
-
-function closeAllModals() {
-
-    $$(".modal-overlay.open").forEach(modal => {
-        modal.classList.remove("open");
-    });
-
+  if (!anyOpen) {
     document.body.style.overflow = "";
+  }
+
 }
 
 
-$$("[data-close]").forEach(button => {
+/* Click outside modal */
 
-    button.addEventListener("click", () => {
-        closeModal(button.dataset.close);
-    });
-
-});
-
-
-$$(".modal-overlay").forEach(overlay => {
+document.querySelectorAll(".modal-overlay")
+  .forEach(overlay => {
 
     overlay.addEventListener("click", event => {
 
-        if (event.target === overlay) {
-            overlay.classList.remove("open");
-
-            if (!document.querySelector(".modal-overlay.open")) {
-                document.body.style.overflow = "";
-            }
-        }
+      if (event.target === overlay) {
+        closeModal(overlay.id);
+      }
 
     });
 
-});
+  });
 
+
+/* Escape */
 
 document.addEventListener("keydown", event => {
 
-    if (event.key === "Escape") {
+  if (event.key !== "Escape") return;
 
-        const open =
-            document.querySelector(".modal-overlay.open");
-
-        if (open) {
-            closeModal(open.id);
-        }
-    }
+  document
+    .querySelectorAll(".modal-overlay.open")
+    .forEach(modal => {
+      closeModal(modal.id);
+    });
 
 });
 
 
-/* ==========================================================
-   AUTH
-========================================================== */
+/* =====================================================
+   SIDEBAR
+===================================================== */
 
-async function checkSession() {
+function toggleSidebar() {
 
-    const {
-        data: { session },
-        error
-    } = await supabaseClient.auth.getSession();
-
-    if (error || !session) {
-        window.location.href = "login.html";
-        return false;
-    }
-
-    currentUser = session.user;
-
-    updateUserUI();
-
-    return true;
-}
-
-
-function updateUserUI() {
-
-    if (!currentUser) return;
-
-    const email =
-        currentUser.email || "Administrateur";
-
-    $("#userEmail").textContent = email;
-
-    $("#settingsEmail").textContent = email;
-
-    $("#userAvatar").textContent =
-        email.charAt(0).toUpperCase();
-}
-
-
-supabaseClient.auth.onAuthStateChange(
-    async (event, session) => {
-
-        if (event === "SIGNED_OUT") {
-            window.location.href = "login.html";
-        }
-
-        if (session) {
-            currentUser = session.user;
-            updateUserUI();
-        }
-    }
-);
-
-
-/* ==========================================================
-   LOAD DASHBOARD
-========================================================== */
-
-async function loadDashboard() {
-
-    await Promise.all([
-        loadStudents(),
-        loadNews(),
-        loadAttendanceStats()
-    ]);
+  document
+    .getElementById("sidebar")
+    .classList.toggle("open");
 
 }
 
 
-/* ==========================================================
-   STUDENTS
-========================================================== */
-
-async function loadStudents() {
-
-    const {
-        data,
-        error
-    } = await supabaseClient
-        .from("students")
-        .select("*")
-        .eq("active", true)
-        .order("registered_at", {
-            ascending: false
-        });
-
-    if (error) {
-
-        console.error(error);
-
-        showToast(
-            "Impossible de charger les élèves.",
-            "error"
-        );
-
-        return;
-    }
-
-    students = data || [];
-
-    $("#studentCount").textContent =
-        students.length;
-
-    renderRecentStudents();
-}
-
-
-function renderRecentStudents() {
-
-    const tbody = $("#recentStudents");
-
-    if (!students.length) {
-
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="4" class="empty">
-                    Aucun élève inscrit.
-                </td>
-            </tr>
-        `;
-
-        return;
-    }
-
-    tbody.innerHTML = students
-        .slice(0, 7)
-        .map(student => {
-
-            return `
-                <tr
-                    class="student-row"
-                    data-student-id="${student.id}">
-
-                    <td>
-                        <div class="student-name">
-                            ${escapeHTML(
-                                `${student.first_name || ""} ${student.last_name || ""}`
-                            )}
-                        </div>
-                    </td>
-
-                    <td>
-                        <span class="student-class">
-                            ${escapeHTML(student.class_name)}
-                        </span>
-                    </td>
-
-                    <td>
-                        ${
-                            Number(student.absence_count || 0) > 0
-                            ? `
-                                <span class="badge badge-absent">
-                                    ${student.absence_count}
-                                </span>
-                              `
-                            : `
-                                <span class="badge badge-present">
-                                    0
-                                </span>
-                              `
-                        }
-                    </td>
-
-                    <td>
-                        ${formatDate(student.registered_at)}
-                    </td>
-
-                </tr>
-            `;
-
-        })
-        .join("");
-
-    $$("#recentStudents .student-row")
-        .forEach(row => {
-
-            row.addEventListener("click", () => {
-
-                openStudentDetail(
-                    row.dataset.studentId
-                );
-
-            });
-
-        });
-}
-
-
-/* ==========================================================
-   ALL STUDENTS MODAL
-========================================================== */
-
-function renderAllStudents(filter = "") {
-
-    const tbody = $("#allStudents");
-
-    const query =
-        filter.trim().toLowerCase();
-
-    const filtered =
-        students.filter(student => {
-
-            const text = [
-                student.first_name,
-                student.last_name,
-                student.class_name,
-                student.email
-            ]
-                .filter(Boolean)
-                .join(" ")
-                .toLowerCase();
-
-            return text.includes(query);
-        });
-
-
-    if (!filtered.length) {
-
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="5" class="empty">
-                    Aucun élève trouvé.
-                </td>
-            </tr>
-        `;
-
-        return;
-    }
-
-
-    tbody.innerHTML = filtered
-        .map(student => {
-
-            return `
-                <tr
-                    class="student-row"
-                    data-student-id="${student.id}">
-
-                    <td>
-                        <div class="student-name">
-                            ${escapeHTML(
-                                `${student.first_name || ""} ${student.last_name || ""}`
-                            )}
-                        </div>
-                    </td>
-
-                    <td>
-                        ${escapeHTML(student.class_name)}
-                    </td>
-
-                    <td>
-                        ${escapeHTML(student.email || "—")}
-                    </td>
-
-                    <td>
-                        <span class="badge ${
-                            Number(student.absence_count || 0)
-                            ? "badge-absent"
-                            : "badge-present"
-                        }">
-                            ${Number(student.absence_count || 0)}
-                        </span>
-                    </td>
-
-                    <td>
-                        ${formatDate(student.registered_at)}
-                    </td>
-
-                </tr>
-            `;
-
-        })
-        .join("");
-
-
-    $$("#allStudents .student-row")
-        .forEach(row => {
-
-            row.addEventListener("click", () => {
-
-                openStudentDetail(
-                    row.dataset.studentId
-                );
-
-            });
-
-        });
-}
-
-
-function openStudentsModal() {
-
-    renderAllStudents();
-
-    openModal("studentsModal");
-}
-
-
-$("#studentSearch").addEventListener(
-    "input",
-    event => {
-        renderAllStudents(event.target.value);
-    }
-);
-
-
-/* ==========================================================
-   ADD STUDENT
-========================================================== */
-
-$("#addStudentForm")
-    .addEventListener("submit", async event => {
-
-        event.preventDefault();
-
-        const button =
-            $("#addStudentSubmit");
-
-        button.disabled = true;
-
-        button.innerHTML = `
-            <span class="loading">
-                <span class="spinner"></span>
-                Ajout...
-            </span>
-        `;
-
-
-        const form =
-            new FormData(event.target);
-
-
-        const payload = {
-
-            first_name:
-                form.get("first_name").trim(),
-
-            last_name:
-                form.get("last_name").trim() || null,
-
-            class_name:
-                form.get("class_name").trim(),
-
-            email:
-                form.get("email").trim() || null,
-
-            message:
-                form.get("message").trim() || null,
-
-            active: true
-
-        };
-
-
-        const {
-            error
-        } = await supabaseClient
-            .from("students")
-            .insert(payload);
-
-
-        button.disabled = false;
-        button.textContent = "Ajouter l'élève";
-
-
-        if (error) {
-
-            console.error(error);
-
-            showToast(
-                "Erreur lors de l'ajout.",
-                "error"
-            );
-
-            return;
-        }
-
-
-        event.target.reset();
-
-        closeModal("addStudentModal");
-
-        await loadStudents();
-
-        showToast("Élève ajouté avec succès.");
-    });
-
-
-/* ==========================================================
-   STUDENT DETAIL
-========================================================== */
-
-async function openStudentDetail(id) {
-
-    const student =
-        students.find(s => s.id === id);
-
-    if (!student) return;
-
-    currentStudent = student;
-
-    const body =
-        $("#studentDetailBody");
-
-
-    body.innerHTML = `
-
-        <div class="profile-header">
-
-            <div class="profile-avatar">
-                ${escapeHTML(
-                    initials(
-                        student.first_name,
-                        student.last_name
-                    )
-                )}
-            </div>
-
-            <div>
-                <div class="profile-name">
-                    ${escapeHTML(
-                        `${student.first_name || ""} ${student.last_name || ""}`
-                    )}
-                </div>
-
-                <div class="profile-class">
-                    ${escapeHTML(student.class_name)}
-                </div>
-            </div>
-
-        </div>
-
-
-        <div class="detail-grid">
-
-            <div class="detail-card">
-                <div class="detail-label">
-                    Classe
-                </div>
-
-                <div class="detail-value">
-                    ${escapeHTML(student.class_name)}
-                </div>
-            </div>
-
-
-            <div class="detail-card">
-                <div class="detail-label">
-                    Absences
-                </div>
-
-                <div class="detail-value">
-                    ${Number(student.absence_count || 0)}
-                </div>
-            </div>
-
-
-            <div class="detail-card">
-                <div class="detail-label">
-                    Inscription
-                </div>
-
-                <div class="detail-value">
-                    ${formatDate(student.registered_at)}
-                </div>
-            </div>
-
-        </div>
-
-
-        <div class="form-group">
-
-            <label class="form-label">
-                Email
-            </label>
-
-            <div class="detail-card">
-                ${escapeHTML(student.email || "Aucun email")}
-            </div>
-
-        </div>
-
-
-        <div class="form-group">
-
-            <label class="form-label">
-                Message
-            </label>
-
-            <div class="detail-card">
-                ${
-                    escapeHTML(
-                        student.message ||
-                        "Aucun message."
-                    )
-                }
-            </div>
-
-        </div>
-
-    `;
-
-
-    $("#deleteStudentButton").onclick =
-        () => deleteStudent(student.id);
-
-
-    openModal("studentDetailModal");
-}
-
-
-async function deleteStudent(id) {
-
-    const student =
-        students.find(s => s.id === id);
-
-    if (!student) return;
-
-
-    const name =
-        `${student.first_name || ""} ${student.last_name || ""}`.trim();
-
-
-    const confirmed =
-        confirm(
-            `Supprimer définitivement ${name} ?`
-        );
-
-
-    if (!confirmed) return;
-
-
-    const {
-        error
-    } = await supabaseClient
-        .from("students")
-        .delete()
-        .eq("id", id);
-
-
-    if (error) {
-
-        console.error(error);
-
-        showToast(
-            "Impossible de supprimer cet élève.",
-            "error"
-        );
-
-        return;
-    }
-
-
-    closeModal("studentDetailModal");
-
-    await loadStudents();
-
-    showToast("Élève supprimé.");
-}
-
-
-/* ==========================================================
-   ATTENDANCE
-========================================================== */
-
-function getTodayISO() {
-
-    const date = new Date();
-
-    const offset =
-        date.getTimezoneOffset();
-
-    const localDate =
-        new Date(
-            date.getTime() -
-            offset * 60 * 1000
-        );
-
-    return localDate
-        .toISOString()
-        .slice(0, 10);
-}
-
-
-function openAttendanceModal() {
-
-    $("#attendanceDate").value =
-        $("#attendanceDate").value ||
-        getTodayISO();
-
-    loadAttendance();
-
-    openModal("attendanceModal");
-}
-
-
-async function loadAttendance() {
-
-    const date =
-        $("#attendanceDate").value;
-
-    if (!date) return;
-
-
-    $("#attendanceList").innerHTML = `
-        <tr>
-            <td colspan="3" class="empty">
-                <span class="loading">
-                    <span class="spinner"></span>
-                    Chargement...
-                </span>
-            </td>
-        </tr>
-    `;
-
-
-    const {
-        data,
-        error
-    } = await supabaseClient
-        .from("attendance")
-        .select("*")
-        .eq("attendance_date", date);
-
-
-    if (error) {
-
-        console.error(error);
-
-        showToast(
-            "Erreur lors du chargement de l'appel.",
-            "error"
-        );
-
-        return;
-    }
-
-
-    attendanceState = {};
-
-    (data || []).forEach(row => {
-
-        attendanceState[row.student_id] =
-            row.status;
-
-    });
-
-
-    renderAttendance();
-}
-
-
-function renderAttendance() {
-
-    const tbody =
-        $("#attendanceList");
-
-
-    if (!students.length) {
-
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="3" class="empty">
-                    Aucun élève inscrit.
-                </td>
-            </tr>
-        `;
-
-        return;
-    }
-
-
-    tbody.innerHTML =
-        students.map(student => {
-
-            const status =
-                attendanceState[student.id] ||
-                "present";
-
-
-            return `
-
-                <tr>
-
-                    <td>
-                        <strong>
-                            ${escapeHTML(
-                                `${student.first_name || ""} ${student.last_name || ""}`
-                            )}
-                        </strong>
-                    </td>
-
-                    <td>
-                        ${escapeHTML(student.class_name)}
-                    </td>
-
-                    <td>
-
-                        <div
-                            class="attendance-toggle"
-                            data-student="${student.id}">
-
-                            <button
-                                class="${
-                                    status === "present"
-                                    ? "active-present"
-                                    : ""
-                                }"
-                                data-status="present">
-
-                                Présent
-
-                            </button>
-
-                            <button
-                                class="${
-                                    status === "absent"
-                                    ? "active-absent"
-                                    : ""
-                                }"
-                                data-status="absent">
-
-                                Absent
-
-                            </button>
-
-                        </div>
-
-                    </td>
-
-                </tr>
-            `;
-
-        }).join("");
-
-
-    $$(".attendance-toggle button")
-        .forEach(button => {
-
-            button.addEventListener(
-                "click",
-                () => {
-
-                    const container =
-                        button.closest(
-                            ".attendance-toggle"
-                        );
-
-                    const studentId =
-                        container.dataset.student;
-
-                    const status =
-                        button.dataset.status;
-
-
-                    attendanceState[
-                        studentId
-                    ] = status;
-
-
-                    container
-                        .querySelectorAll("button")
-                        .forEach(btn => {
-
-                            btn.classList.remove(
-                                "active-present",
-                                "active-absent"
-                            );
-
-                        });
-
-
-                    button.classList.add(
-                        status === "present"
-                            ? "active-present"
-                            : "active-absent"
-                    );
-
-                }
-            );
-
-        });
-}
-
-
-$("#loadAttendanceButton")
-    .addEventListener(
-        "click",
-        loadAttendance
-    );
-
-
-$("#saveAttendanceButton")
-    .addEventListener(
-        "click",
-        saveAttendance
-    );
-
-
-async function saveAttendance() {
-
-    const date =
-        $("#attendanceDate").value;
-
-    if (!date) {
-
-        showToast(
-            "Veuillez sélectionner une date.",
-            "error"
-        );
-
-        return;
-    }
-
-
-    const records =
-        students.map(student => ({
-
-            student_id: student.id,
-
-            attendance_date: date,
-
-            status:
-                attendanceState[student.id] ||
-                "present"
-
-        }));
-
-
-    const {
-        error
-    } = await supabaseClient
-        .from("attendance")
-        .upsert(
-            records,
-            {
-                onConflict:
-                    "student_id,attendance_date"
-            }
-        );
-
-
-    if (error) {
-
-        console.error(error);
-
-        showToast(
-            "Impossible d'enregistrer l'appel.",
-            "error"
-        );
-
-        return;
-    }
-
-
-    await updateAbsenceCounts();
-
-    closeModal("attendanceModal");
-
-    await loadDashboard();
-
-    showToast("Feuille d'appel enregistrée.");
-}
-
-
-async function updateAbsenceCounts() {
-
-    for (const student of students) {
-
-        const {
-            count,
-            error
-        } = await supabaseClient
-            .from("attendance")
-            .select("*", {
-                count: "exact",
-                head: true
-            })
-            .eq("student_id", student.id)
-            .eq("status", "absent");
-
-
-        if (!error) {
-
-            await supabaseClient
-                .from("students")
-                .update({
-                    absence_count:
-                        count || 0
-                })
-                .eq("id", student.id);
-
-        }
-    }
+function showDashboard() {
+
+  document
+    .getElementById("sidebar")
+    .classList.remove("open");
 
 }
 
 
-/* ==========================================================
-   ATTENDANCE STATS
-========================================================== */
-
-async function loadAttendanceStats() {
-
-    const {
-        data,
-        error
-    } = await supabaseClient
-        .from("attendance")
-        .select("status, attendance_date")
-        .order("attendance_date", {
-            ascending: false
-        });
-
-
-    if (error) {
-
-        console.error(error);
-
-        $("#presentCount").textContent = "0";
-        $("#absenceCount").textContent = "0";
-
-        return;
-    }
-
-
-    const rows = data || [];
-
-    if (!rows.length) {
-
-        $("#presentCount").textContent = "0";
-        $("#absenceCount").textContent = "0";
-
-        return;
-    }
-
-
-    const latestDate =
-        rows[0].attendance_date;
-
-
-    const latest =
-        rows.filter(
-            row =>
-                row.attendance_date ===
-                latestDate
-        );
-
-
-    const present =
-        latest.filter(
-            row => row.status === "present"
-        ).length;
-
-
-    const absent =
-        rows.filter(
-            row => row.status === "absent"
-        ).length;
-
-
-    $("#presentCount").textContent =
-        present;
-
-    $("#absenceCount").textContent =
-        absent;
-}
-
-
-/* ==========================================================
-   NEWS
-========================================================== */
-
-async function loadNews() {
-
-    const {
-        data,
-        error
-    } = await supabaseClient
-        .from("news")
-        .select("*")
-        .order("created_at", {
-            ascending: false
-        });
-
-
-    if (error) {
-
-        console.error(error);
-
-        return;
-    }
-
-
-    const news =
-        data || [];
-
-
-    $("#newsCount").textContent =
-        news.length;
-
-
-    renderRecentNews(news);
-
-    renderNewsManager(news);
-}
-
-
-function renderRecentNews(news) {
-
-    const container =
-        $("#recentNews");
-
-
-    if (!news.length) {
-
-        container.innerHTML = `
-            <div class="empty">
-                Aucune actualité pour le moment.
-            </div>
-        `;
-
-        return;
-    }
-
-
-    container.innerHTML =
-        news.slice(0, 4)
-            .map(item => {
-
-                return `
-
-                    <div class="news-item">
-
-                        <div class="news-item-title">
-                            ${escapeHTML(item.title)}
-                        </div>
-
-                        <div class="news-item-meta">
-
-                            ${formatDate(item.created_at)}
-
-                            ·
-
-                            ${
-                                item.published
-                                ? "Publiée"
-                                : "Brouillon"
-                            }
-
-                        </div>
-
-                    </div>
-
-                `;
-
-            })
-            .join("");
-}
-
-
-function renderNewsManager(news) {
-
-    const container =
-        $("#newsManagerList");
-
-
-    if (!news.length) {
-
-        container.innerHTML = `
-            <div class="empty">
-                Aucune actualité créée.
-            </div>
-        `;
-
-        return;
-    }
-
-
-    container.innerHTML =
-        news.map(item => {
-
-            return `
-
-                <div
-                    style="
-                        padding:18px 0;
-                        border-bottom:1px solid var(--gray-100);
-                        display:flex;
-                        justify-content:space-between;
-                        gap:20px;
-                        align-items:center;
-                    ">
-
-                    <div style="min-width:0">
-
-                        <div
-                            style="
-                                font-size:13px;
-                                font-weight:700;
-                            ">
-
-                            ${escapeHTML(item.title)}
-
-                        </div>
-
-                        <div
-                            style="
-                                color:var(--gray-500);
-                                font-size:9px;
-                                margin-top:5px;
-                            ">
-
-                            ${formatDate(item.created_at)}
-                            ·
-                            ${
-                                item.published
-                                ? "Publiée"
-                                : "Brouillon"
-                            }
-
-                        </div>
-
-                    </div>
-
-
-                    <div
-                        style="
-                            display:flex;
-                            gap:7px;
-                            flex-shrink:0;
-                        ">
-
-                        <button
-                            class="button button-light"
-                            data-edit-news="${item.id}">
-
-                            Modifier
-
-                        </button>
-
-                        <button
-                            class="button button-danger"
-                            data-delete-news="${item.id}">
-
-                            Supprimer
-
-                        </button>
-
-                    </div>
-
-                </div>
-
-            `;
-
-        }).join("");
-
-
-    $$("[data-edit-news]")
-        .forEach(button => {
-
-            button.addEventListener(
-                "click",
-                () => editNews(
-                    button.dataset.editNews
-                )
-            );
-
-        });
-
-
-    $$("[data-delete-news]")
-        .forEach(button => {
-
-            button.addEventListener(
-                "click",
-                () => deleteNews(
-                    button.dataset.deleteNews
-                )
-            );
-
-        });
-}
-
-
-function openNewsModal() {
-
-    loadNews();
-
-    openModal("newsModal");
-}
-
-
-function openNewNewsEditor() {
-
-    editingNewsId = null;
-
-    $("#newsId").value = "";
-
-    $("#newsTitle").value = "";
-
-    $("#newsContent").value = "";
-
-    $("#newsPublished").checked = false;
-
-    $("#newsEditorTitle").textContent =
-        "Nouvelle actualité";
-
-    openModal("newsEditorModal");
-}
-
-
-async function editNews(id) {
-
-    const {
-        data,
-        error
-    } = await supabaseClient
-        .from("news")
-        .select("*")
-        .eq("id", id)
-        .single();
-
-
-    if (error) {
-
-        showToast(
-            "Impossible de charger cette actualité.",
-            "error"
-        );
-
-        return;
-    }
-
-
-    editingNewsId = id;
-
-    $("#newsId").value = id;
-
-    $("#newsTitle").value =
-        data.title || "";
-
-    $("#newsContent").value =
-        data.content || "";
-
-    $("#newsPublished").checked =
-        Boolean(data.published);
-
-    $("#newsEditorTitle").textContent =
-        "Modifier l'actualité";
-
-
-    openModal("newsEditorModal");
-}
-
-
-$("#newNewsButton")
-    .addEventListener(
-        "click",
-        openNewNewsEditor
-    );
-
-
-$("#newsForm")
-    .addEventListener(
-        "submit",
-        async event => {
-
-            event.preventDefault();
-
-
-            const title =
-                $("#newsTitle")
-                    .value
-                    .trim();
-
-            const content =
-                $("#newsContent")
-                    .value
-                    .trim();
-
-            const published =
-                $("#newsPublished")
-                    .checked;
-
-
-            if (!title || !content) {
-
-                showToast(
-                    "Le titre et le contenu sont obligatoires.",
-                    "error"
-                );
-
-                return;
-            }
-
-
-            const payload = {
-                title,
-                content,
-                published
-            };
-
-
-            let error;
-
-
-            if (editingNewsId) {
-
-                ({
-                    error
-                } = await supabaseClient
-                    .from("news")
-                    .update(payload)
-                    .eq("id", editingNewsId));
-
-            } else {
-
-                ({
-                    error
-                } = await supabaseClient
-                    .from("news")
-                    .insert(payload));
-
-            }
-
-
-            if (error) {
-
-                console.error(error);
-
-                showToast(
-                    "Impossible d'enregistrer l'actualité.",
-                    "error"
-                );
-
-                return;
-            }
-
-
-            closeModal("newsEditorModal");
-
-            await loadNews();
-
-            showToast(
-                editingNewsId
-                    ? "Actualité modifiée."
-                    : "Actualité créée."
-            );
-
-        }
-    );
-
-
-async function deleteNews(id) {
-
-    if (!confirm("Supprimer cette actualité ?")) {
-        return;
-    }
-
-
-    const {
-        error
-    } = await supabaseClient
-        .from("news")
-        .delete()
-        .eq("id", id);
-
-
-    if (error) {
-
-        console.error(error);
-
-        showToast(
-            "Impossible de supprimer l'actualité.",
-            "error"
-        );
-
-        return;
-    }
-
-
-    await loadNews();
-
-    showToast("Actualité supprimée.");
-}
-
-
-/* ==========================================================
-   NAVIGATION → MODALS
-========================================================== */
-
-function setActiveNav(action) {
-
-    $$(".nav-button")
-        .forEach(button => {
-
-            button.classList.toggle(
-                "active",
-                button.dataset.action === action
-            );
-
-        });
-}
-
-
-function handleAction(action) {
-
-    document
-        .getElementById("sidebar")
-        ?.classList
-        .remove("mobile-open");
-
-
-    switch (action) {
-
-        case "dashboard":
-
-            setActiveNav("dashboard");
-
-            closeAllModals();
-
-            window.scrollTo({
-                top: 0,
-                behavior: "smooth"
-            });
-
-            break;
-
-
-        case "students":
-
-            setActiveNav("students");
-
-            openStudentsModal();
-
-            break;
-
-
-        case "add-student":
-
-            openModal("addStudentModal");
-
-            break;
-
-
-        case "attendance":
-
-            setActiveNav("attendance");
-
-            openAttendanceModal();
-
-            break;
-
-
-        case "news":
-
-            setActiveNav("news");
-
-            openNewsModal();
-
-            break;
-
-
-        case "settings":
-
-            setActiveNav("settings");
-
-            openModal("settingsModal");
-
-            break;
-
-    }
-
-}
-
-
-$$("[data-action]")
-    .forEach(button => {
-
-        button.addEventListener(
-            "click",
-            () => {
-                handleAction(
-                    button.dataset.action
-                );
-            }
-        );
-
-    });
-
-
-$("#openStudentsButton")
-    .addEventListener(
-        "click",
-        () => handleAction("students")
-    );
-
-
-/* ==========================================================
+/* =====================================================
    LOGOUT
-========================================================== */
+===================================================== */
 
-$("#logoutButton")
-    .addEventListener(
-        "click",
-        async () => {
+async function logout() {
 
-            const {
-                error
-            } = await supabaseClient
-                .auth
-                .signOut();
+  try {
 
+    await supabaseClient.auth.signOut();
 
-            if (error) {
+  } finally {
 
-                showToast(
-                    "Impossible de se déconnecter.",
-                    "error"
-                );
+    window.location.href = "login.html";
 
-                return;
-            }
-
-
-            window.location.href =
-                "login.html";
-        }
-    );
-
-
-/* ==========================================================
-   REFRESH
-========================================================== */
-
-$("#refreshButton")
-    .addEventListener(
-        "click",
-        async () => {
-
-            const button =
-                $("#refreshButton");
-
-            button.style.transform =
-                "rotate(360deg)";
-
-
-            await loadDashboard();
-
-
-            setTimeout(() => {
-
-                button.style.transform =
-                    "";
-
-                showToast(
-                    "Données actualisées."
-                );
-
-            }, 300);
-
-        }
-    );
-
-
-/* ==========================================================
-   MOBILE MENU
-========================================================== */
-
-$("#mobileMenu")
-    .addEventListener(
-        "click",
-        () => {
-
-            $("#sidebar")
-                .classList
-                .toggle("mobile-open");
-
-        }
-    );
-
-
-/* ==========================================================
-   DATE
-========================================================== */
-
-function updateDate() {
-
-    $("#currentDate")
-        .textContent =
-        formatLongDate(new Date());
-}
-
-
-/* ==========================================================
-   INIT
-========================================================== */
-
-async function init() {
-
-    updateDate();
-
-
-    const authenticated =
-        await checkSession();
-
-
-    if (!authenticated) {
-        return;
-    }
-
-
-    await loadDashboard();
+  }
 
 }
 
 
-init();
+/* =====================================================
+   REALTIME
+===================================================== */
+
+function setupRealtime() {
+
+  supabaseClient
+    .channel("students-admin")
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "students"
+      },
+      async () => {
+
+        await loadMembers();
+
+      }
+    )
+    .subscribe();
+
+}
+
+
+/* =====================================================
+   HELPERS
+===================================================== */
+
+function fullName(member) {
+
+  const first =
+    member.first_name || "";
+
+  const last =
+    member.last_name || "";
+
+  return `${first} ${last}`.trim() || "Sans nom";
+
+}
+
+
+function formatDate(date) {
+
+  if (!date) return "—";
+
+  try {
+
+    return new Date(date).toLocaleString(
+      "fr-FR",
+      {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      }
+    );
+
+  } catch {
+
+    return "—";
+
+  }
+
+}
+
+
+function formatDateShort(date) {
+
+  if (!date) return "—";
+
+  try {
+
+    return new Date(date).toLocaleDateString(
+      "fr-FR",
+      {
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit"
+      }
+    );
+
+  } catch {
+
+    return "—";
+
+  }
+
+}
+
+
+function escapeHtml(value) {
+
+  if (value === null || value === undefined) {
+    return "";
+  }
+
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+
+function showToast(message, error = false) {
+
+  const container =
+    document.getElementById("toastContainer");
+
+  const toast =
+    document.createElement("div");
+
+  toast.className =
+    "toast" + (error ? " error" : "");
+
+  toast.textContent = message;
+
+  container.appendChild(toast);
+
+  setTimeout(() => {
+
+    toast.remove();
+
+  }, 3500);
+
+}
 
 </script>
 
