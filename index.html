@@ -2,37 +2,28 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Administration — Atelier jeu d'échecs Lezay</title>
+  <title>Admin — Atelier Jeu d'Échecs Lezay</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-  <link
-    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
-    rel="stylesheet"
-  />
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-
     :root {
-      --bg: #f5f5f2;
+      --bg: #f5f5f3;
       --surface: #ffffff;
-      --surface-2: #eeeeea;
+      --surface-2: #fafafa;
       --text: #111111;
-      --muted: #777773;
-      --line: #deded8;
-
-      --danger: #b42318;
-      --success: #18794e;
-
-      --radius: 20px;
-      --shadow:
-        0 20px 60px rgba(0,0,0,.10);
+      --muted: #777777;
+      --border: #e7e7e7;
+      --black: #111111;
+      --danger: #d9363e;
+      --danger-bg: #fff1f1;
+      --success: #17834b;
+      --success-bg: #edf9f2;
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.10);
+      --radius: 18px;
     }
 
     * {
@@ -42,16 +33,23 @@
     }
 
     body {
-      min-height: 100vh;
-      font-family: "DM Sans", sans-serif;
+      font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
       background: var(--bg);
       color: var(--text);
+      min-height: 100vh;
     }
 
     button,
     input,
-    select,
-    textarea {
+    textarea,
+    select {
       font: inherit;
     }
 
@@ -59,94 +57,93 @@
       cursor: pointer;
     }
 
-    /* ==================================
+    /* =========================
        LAYOUT
-    ================================== */
+    ========================= */
 
     .app {
-      min-height: 100vh;
       display: flex;
+      min-height: 100vh;
     }
 
     .sidebar {
+      width: 260px;
+      background: #0d0d0d;
+      color: white;
+      padding: 26px 18px;
       position: fixed;
       inset: 0 auto 0 0;
-      width: 250px;
-      background: #111;
-      color: #fff;
-      padding: 24px 18px;
+      z-index: 20;
       display: flex;
       flex-direction: column;
-      z-index: 100;
     }
 
-    .logo {
+    .brand {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 5px 8px 30px;
+      gap: 13px;
+      padding: 4px 10px 30px;
     }
 
-    .logo img {
-      width: 43px;
-      height: 43px;
+    .brand img {
+      width: 45px;
+      height: 45px;
       object-fit: contain;
-      border-radius: 10px;
-      background: #fff;
+      background: white;
+      border-radius: 12px;
+      padding: 4px;
     }
 
-    .logo strong {
+    .brand-text strong {
       display: block;
-      font-family: "Manrope", sans-serif;
-      font-size: 13px;
-      line-height: 1.15;
-      letter-spacing: -.02em;
+      font-size: 14px;
+      letter-spacing: -0.02em;
     }
 
-    .logo span {
+    .brand-text span {
       display: block;
+      margin-top: 3px;
       color: #888;
-      font-size: 10px;
-      margin-top: 4px;
+      font-size: 11px;
     }
 
-    .side-label {
-      padding: 0 10px;
+    .sidebar-label {
       color: #666;
       font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .12em;
       text-transform: uppercase;
-      letter-spacing: .13em;
-      font-weight: 800;
-      margin: 12px 0 9px;
+      padding: 0 12px;
+      margin-bottom: 8px;
     }
 
-    .side-nav {
+    .nav {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 5px;
     }
 
-    .side-nav button {
+    .nav button {
       width: 100%;
       border: 0;
       background: transparent;
-      color: #999;
-      border-radius: 12px;
-      padding: 12px;
+      color: #aaa;
+      padding: 13px 12px;
+      border-radius: 11px;
+      text-align: left;
       display: flex;
       align-items: center;
       gap: 11px;
-      text-align: left;
-      transition: .2s;
+      transition: .2s ease;
     }
 
-    .side-nav button:hover,
-    .side-nav button.active {
+    .nav button:hover,
+    .nav button.active {
       background: #202020;
-      color: #fff;
+      color: white;
     }
 
-    .side-icon {
+    .nav-icon {
       width: 20px;
       text-align: center;
       font-size: 16px;
@@ -156,226 +153,208 @@
       margin-top: auto;
     }
 
-    .admin-user {
-      border-top: 1px solid #292929;
-      padding-top: 18px;
-      margin-top: 18px;
+    .admin-card {
+      border: 1px solid #292929;
+      background: #171717;
+      padding: 14px;
+      border-radius: 14px;
+      margin-bottom: 10px;
     }
 
-    .admin-email {
-      color: #888;
-      font-size: 11px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      padding: 0 8px;
+    .admin-card small {
+      color: #777;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .admin-card div {
+      margin-top: 5px;
+      font-size: 12px;
+      word-break: break-all;
+      color: #ddd;
     }
 
     .logout-btn {
-      margin-top: 10px;
       width: 100%;
       border: 1px solid #292929;
-      color: #aaa;
       background: transparent;
+      color: #aaa;
+      padding: 12px;
       border-radius: 11px;
-      padding: 10px;
-      font-size: 12px;
+      transition: .2s;
     }
 
     .logout-btn:hover {
+      background: #252525;
       color: white;
-      border-color: #555;
     }
+
+    /* =========================
+       MAIN
+    ========================= */
 
     .main {
-      width: calc(100% - 250px);
-      margin-left: 250px;
-      padding: 34px;
+      margin-left: 260px;
+      width: calc(100% - 260px);
+      min-height: 100vh;
     }
-
-    .main-inner {
-      width: min(1250px, 100%);
-      margin: 0 auto;
-    }
-
-    /* ==================================
-       TOP
-    ================================== */
 
     .topbar {
+      height: 78px;
+      padding: 0 38px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,.85);
+      backdrop-filter: blur(15px);
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 20px;
-      margin-bottom: 32px;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
-    .page-kicker {
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .12em;
+    .page-title h1 {
+      font-size: 21px;
+      letter-spacing: -0.04em;
+    }
+
+    .page-title p {
       color: var(--muted);
-      margin-bottom: 7px;
-    }
-
-    h1 {
-      font-family: "Manrope", sans-serif;
-      font-size: clamp(30px, 4vw, 46px);
-      line-height: 1;
-      letter-spacing: -.055em;
+      font-size: 12px;
+      margin-top: 3px;
     }
 
     .top-actions {
       display: flex;
+      align-items: center;
       gap: 9px;
     }
 
-    /* ==================================
-       BUTTONS
-    ================================== */
-
-    .btn {
-      min-height: 43px;
-      padding: 0 16px;
-      border-radius: 12px;
-      border: 1px solid transparent;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-weight: 700;
-      font-size: 13px;
-      transition: .2s;
+    .mobile-menu {
+      display: none;
     }
 
-    .btn:hover {
-      transform: translateY(-1px);
+    .content {
+      padding: 38px;
+      max-width: 1450px;
+      margin: auto;
     }
 
-    .btn-dark {
-      background: #111;
-      color: white;
+    /* =========================
+       DASHBOARD
+    ========================= */
+
+    .welcome {
+      margin-bottom: 28px;
     }
 
-    .btn-light {
-      background: var(--surface);
-      color: var(--text);
-      border-color: var(--line);
+    .welcome h2 {
+      font-size: 32px;
+      letter-spacing: -0.05em;
     }
 
-    .btn-danger {
-      background: var(--danger);
-      color: white;
-    }
-
-    .btn:disabled {
-      opacity: .55;
-      cursor: wait;
-      transform: none;
-    }
-
-    /* ==================================
-       STATS
-    ================================== */
-
-    .stats {
-      display: grid;
-      grid-template-columns:
-        repeat(3, minmax(0, 1fr));
-      gap: 14px;
-      margin-bottom: 30px;
-    }
-
-    .stat-card {
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 22px;
-    }
-
-    .stat-card span {
-      display: block;
-      color: var(--muted);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: .09em;
-      font-weight: 700;
-    }
-
-    .stat-card strong {
-      display: block;
-      font-family: "Manrope", sans-serif;
-      font-size: 38px;
-      letter-spacing: -.06em;
-      margin-top: 8px;
-    }
-
-    .stat-card p {
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 3px;
-    }
-
-    /* ==================================
-       MEMBERS
-    ================================== */
-
-    .panel {
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
-
-    .panel-header {
-      padding: 22px;
-      border-bottom: 1px solid var(--line);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-    }
-
-    .panel-title h2 {
-      font-family: "Manrope", sans-serif;
-      font-size: 21px;
-      letter-spacing: -.04em;
-    }
-
-    .panel-title p {
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 3px;
-    }
-
-    .search {
-      width: min(300px, 100%);
-      position: relative;
-    }
-
-    .search input {
-      width: 100%;
-      border: 1px solid var(--line);
-      background: var(--bg);
-      color: var(--text);
-      border-radius: 11px;
-      padding: 11px 13px 11px 36px;
-      outline: none;
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 13px;
-      top: 50%;
-      transform: translateY(-50%);
+    .welcome p {
+      margin-top: 7px;
       color: var(--muted);
       font-size: 14px;
     }
 
-    /* ==================================
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 25px;
+    }
+
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 23px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .stat-value {
+      font-size: 34px;
+      font-weight: 750;
+      letter-spacing: -0.06em;
+      margin-top: 8px;
+    }
+
+    .dashboard-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 21px 23px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-header h3 {
+      font-size: 15px;
+    }
+
+    .card-header span {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* =========================
+       BUTTONS
+    ========================= */
+
+    .btn {
+      border: 1px solid var(--border);
+      background: white;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 12px;
+      font-weight: 650;
+      transition: .2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      border-color: #bbb;
+    }
+
+    .btn-black {
+      background: var(--black);
+      color: white;
+      border-color: var(--black);
+    }
+
+    .btn-black:hover {
+      background: #292929;
+      border-color: #292929;
+    }
+
+    .btn-danger {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border-color: #ffd5d7;
+    }
+
+    .btn-small {
+      padding: 7px 10px;
+      font-size: 11px;
+    }
+
+    /* =========================
        TABLE
-    ================================== */
+    ========================= */
 
     .table-wrap {
       overflow-x: auto;
@@ -384,139 +363,125 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 700px;
     }
 
     th {
       text-align: left;
       padding: 13px 20px;
-      color: var(--muted);
-      background: var(--surface-2);
+      color: #888;
       font-size: 10px;
+      font-weight: 750;
       text-transform: uppercase;
-      letter-spacing: .09em;
-      font-weight: 800;
+      letter-spacing: .08em;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
     }
 
     td {
-      padding: 16px 20px;
-      border-top: 1px solid var(--line);
+      padding: 15px 20px;
+      border-bottom: 1px solid var(--border);
       font-size: 13px;
+      vertical-align: middle;
     }
 
     tbody tr {
-      transition: background .15s;
+      transition: .15s;
     }
 
     tbody tr:hover {
-      background: var(--surface-2);
+      background: #fafafa;
     }
 
-    .student-name {
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .member-name {
       font-weight: 700;
     }
 
-    .student-email {
-      color: var(--muted);
-      font-size: 12px;
+    .member-id {
+      color: #aaa;
+      font-size: 10px;
+      margin-top: 3px;
     }
 
     .class-badge {
       display: inline-flex;
       padding: 5px 9px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
+      border-radius: 7px;
+      background: #f0f0f0;
       font-size: 11px;
       font-weight: 700;
     }
 
     .date {
-      color: var(--muted);
+      color: #777;
       font-size: 12px;
     }
 
-    .row-actions {
+    .actions {
       display: flex;
       gap: 6px;
-    }
-
-    .icon-btn {
-      width: 34px;
-      height: 34px;
-      border: 1px solid var(--line);
-      border-radius: 9px;
-      background: var(--surface);
-      color: var(--text);
-      display: grid;
-      place-items: center;
-      font-size: 14px;
-    }
-
-    .icon-btn:hover {
-      background: var(--surface-2);
-    }
-
-    .icon-btn.delete:hover {
-      color: var(--danger);
-      border-color: #e4b7b3;
+      justify-content: flex-end;
     }
 
     .empty {
-      padding: 60px 20px;
+      padding: 55px 20px;
       text-align: center;
-      color: var(--muted);
+      color: #888;
     }
 
     .empty strong {
       display: block;
-      color: var(--text);
-      font-family: "Manrope", sans-serif;
-      font-size: 18px;
+      color: #333;
       margin-bottom: 5px;
     }
 
-    /* ==================================
-       STATUS
-    ================================== */
+    /* =========================
+       SEARCH
+    ========================= */
 
-    .connection {
-      position: fixed;
-      right: 20px;
-      bottom: 20px;
-      z-index: 150;
+    .members-toolbar {
       display: flex;
       align-items: center;
-      gap: 7px;
-      padding: 9px 12px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: var(--surface);
-      box-shadow: var(--shadow);
-      color: var(--muted);
-      font-size: 11px;
+      gap: 10px;
+      margin-bottom: 18px;
     }
 
-    .connection-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--success);
+    .search {
+      flex: 1;
+      position: relative;
     }
 
-    .connection.error .connection-dot {
-      background: var(--danger);
+    .search input {
+      width: 100%;
+      height: 44px;
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 11px;
+      padding: 0 15px;
+      outline: none;
+      font-size: 13px;
+      transition: .2s;
     }
 
-    /* ==================================
-       MODAL
-    ================================== */
+    .search input:focus {
+      border-color: #999;
+      box-shadow: 0 0 0 3px rgba(0,0,0,.04);
+    }
+
+    /* =========================
+       MODALS
+    ========================= */
 
     .modal-overlay {
       position: fixed;
       inset: 0;
-      z-index: 500;
-      background: rgba(0,0,0,.62);
-      backdrop-filter: blur(9px);
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(7px);
+      z-index: 100;
       display: none;
       align-items: center;
       justify-content: center;
@@ -528,23 +493,25 @@
     }
 
     .modal {
-      width: min(570px, 100%);
+      width: 100%;
+      max-width: 560px;
       max-height: 90vh;
       overflow-y: auto;
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      padding: 27px;
-      box-shadow: 0 35px 100px rgba(0,0,0,.3);
-      animation: modalIn .2s ease;
+      background: white;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      animation: modalIn .18s ease;
+    }
+
+    .modal.large {
+      max-width: 700px;
     }
 
     @keyframes modalIn {
       from {
         opacity: 0;
-        transform: translateY(12px) scale(.98);
+        transform: translateY(10px) scale(.98);
       }
-
       to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -552,291 +519,333 @@
     }
 
     .modal-header {
+      padding: 22px 24px;
+      border-bottom: 1px solid var(--border);
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
-      gap: 20px;
-      margin-bottom: 25px;
     }
 
     .modal-header h2 {
-      font-family: "Manrope", sans-serif;
-      font-size: 28px;
-      line-height: 1.05;
-      letter-spacing: -.05em;
-    }
-
-    .modal-header p {
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 7px;
+      font-size: 18px;
+      letter-spacing: -0.03em;
     }
 
     .close {
-      width: 36px;
-      height: 36px;
-      border: 1px solid var(--line);
-      background: transparent;
-      color: var(--text);
-      border-radius: 50%;
-      font-size: 20px;
+      border: 0;
+      background: #f3f3f3;
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      font-size: 18px;
+      line-height: 1;
     }
 
-    /* ==================================
-       FORM
-    ================================== */
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
+    .modal-body {
+      padding: 24px;
     }
 
-    .field {
+    .modal-footer {
+      padding: 18px 24px;
+      border-top: 1px solid var(--border);
       display: flex;
-      flex-direction: column;
-      gap: 6px;
+      justify-content: flex-end;
+      gap: 8px;
     }
 
-    .field.full {
-      grid-column: 1 / -1;
+    /* =========================
+       DETAILS
+    ========================= */
+
+    .detail-head {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 25px;
     }
 
-    .field label {
-      font-size: 11px;
+    .avatar {
+      width: 54px;
+      height: 54px;
+      border-radius: 15px;
+      background: #111;
+      color: white;
+      display: grid;
+      place-items: center;
+      font-size: 18px;
       font-weight: 800;
     }
 
-    .field input,
-    .field select,
-    .field textarea {
-      width: 100%;
-      border: 1px solid var(--line);
-      background: var(--bg);
-      color: var(--text);
-      border-radius: 11px;
-      padding: 11px 12px;
-      outline: none;
+    .detail-head h3 {
+      font-size: 18px;
     }
 
-    .field textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-
-    .field input:focus,
-    .field select:focus,
-    .field textarea:focus {
-      border-color: var(--text);
-    }
-
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 9px;
-      margin-top: 22px;
-    }
-
-    .message {
-      display: none;
-      padding: 11px 13px;
-      border-radius: 10px;
+    .detail-head p {
+      color: #888;
       font-size: 12px;
-      margin-top: 14px;
+      margin-top: 3px;
     }
 
-    .message.error {
-      display: block;
-      background: #fff0ef;
-      border: 1px solid #ecc9c5;
-      color: var(--danger);
-    }
-
-    /* ==================================
-       DETAILS
-    ================================== */
-
-    .detail-list {
+    .detail-grid {
       display: grid;
-      gap: 0;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      overflow: hidden;
+      grid-template-columns: 1fr 1fr;
+      gap: 13px;
     }
 
-    .detail-row {
-      display: grid;
-      grid-template-columns: 130px 1fr;
-      gap: 15px;
-      padding: 13px 15px;
-      border-bottom: 1px solid var(--line);
+    .detail-item {
+      border: 1px solid var(--border);
+      background: #fafafa;
+      padding: 15px;
+      border-radius: 12px;
     }
 
-    .detail-row:last-child {
-      border-bottom: 0;
+    .detail-item.full {
+      grid-column: 1 / -1;
     }
 
-    .detail-row span {
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 700;
+    .detail-label {
+      color: #888;
+      font-size: 10px;
+      font-weight: 750;
+      text-transform: uppercase;
+      letter-spacing: .08em;
     }
 
-    .detail-row strong {
+    .detail-value {
+      margin-top: 6px;
       font-size: 13px;
       word-break: break-word;
     }
 
+    /* =========================
+       FORMS
+    ========================= */
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #555;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 12px;
+      outline: none;
+      background: white;
+      font-size: 13px;
+      transition: .2s;
+    }
+
+    .form-group textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      border-color: #999;
+      box-shadow: 0 0 0 3px rgba(0,0,0,.04);
+    }
+
+    /* =========================
+       DELETE
+    ========================= */
+
     .delete-warning {
       text-align: center;
-      padding: 15px 5px;
+      padding: 8px 0 10px;
     }
 
     .warning-icon {
       width: 55px;
       height: 55px;
-      margin: 0 auto 18px;
-      border-radius: 50%;
-      background: #fff0ef;
-      color: var(--danger);
+      margin: 0 auto 15px;
       display: grid;
       place-items: center;
+      background: var(--danger-bg);
+      color: var(--danger);
+      border-radius: 50%;
       font-size: 24px;
     }
 
-    .delete-warning h2 {
-      font-family: "Manrope", sans-serif;
-      font-size: 25px;
-      letter-spacing: -.04em;
+    .delete-warning h3 {
+      font-size: 18px;
+      margin-bottom: 7px;
     }
 
     .delete-warning p {
-      color: var(--muted);
+      color: #777;
       font-size: 13px;
       line-height: 1.6;
-      margin-top: 8px;
     }
 
-    /* ==================================
+    /* =========================
+       TOAST
+    ========================= */
+
+    .toast-container {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 300;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toast {
+      background: #111;
+      color: white;
+      padding: 13px 16px;
+      border-radius: 11px;
+      box-shadow: var(--shadow);
+      font-size: 12px;
+      animation: toastIn .2s ease;
+    }
+
+    .toast.error {
+      background: #b9252e;
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* =========================
        LOADING
-    ================================== */
+    ========================= */
 
     .loading {
-      padding: 50px;
+      padding: 45px;
       text-align: center;
-      color: var(--muted);
+      color: #888;
       font-size: 13px;
     }
 
-    /* ==================================
-       MOBILE
-    ================================== */
-
-    .mobile-menu {
-      display: none;
+    .spinner {
+      width: 23px;
+      height: 23px;
+      border: 2px solid #ddd;
+      border-top-color: #111;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      margin: 0 auto 10px;
     }
 
-    @media (max-width: 850px) {
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
 
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 900px) {
       .sidebar {
-        width: 220px;
+        transform: translateX(-100%);
+        transition: .25s;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
       }
 
       .main {
-        width: calc(100% - 220px);
-        margin-left: 220px;
-        padding: 25px;
+        margin-left: 0;
+        width: 100%;
+      }
+
+      .mobile-menu {
+        display: block;
+        border: 0;
+        background: #f1f1f1;
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+      }
+
+      .topbar {
+        padding: 0 18px;
+      }
+
+      .content {
+        padding: 25px 18px;
       }
 
       .stats {
         grid-template-columns: 1fr;
       }
 
-      .panel-header {
-        align-items: stretch;
-        flex-direction: column;
-      }
-
-      .search {
-        width: 100%;
-      }
-
-    }
-
-    @media (max-width: 650px) {
-
-      .sidebar {
-        width: 100%;
-        height: 70px;
-        bottom: auto;
-        padding: 12px 15px;
-        flex-direction: row;
-        align-items: center;
-      }
-
-      .logo {
-        padding: 0;
-      }
-
-      .logo img {
-        width: 38px;
-        height: 38px;
-      }
-
-      .logo span,
-      .side-label,
-      .side-nav,
-      .admin-user {
-        display: none;
-      }
-
-      .sidebar-bottom {
-        margin-left: auto;
-      }
-
-      .logout-btn {
-        margin: 0;
-        width: auto;
-        padding: 8px 12px;
-      }
-
-      .main {
-        width: 100%;
-        margin-left: 0;
-        padding: 95px 15px 30px;
-      }
-
-      .topbar {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-
-      .top-actions {
-        width: 100%;
-      }
-
-      .top-actions .btn {
-        flex: 1;
-      }
-
-      .form-grid {
+      .form-grid,
+      .detail-grid {
         grid-template-columns: 1fr;
       }
 
-      .field.full {
+      .detail-item.full {
         grid-column: auto;
-      }
-
-      .modal {
-        padding: 20px;
-      }
-
-      .connection {
-        bottom: 12px;
-        right: 12px;
       }
     }
 
+    @media (max-width: 600px) {
+      .topbar {
+        height: 68px;
+      }
+
+      .page-title p {
+        display: none;
+      }
+
+      .welcome h2 {
+        font-size: 27px;
+      }
+
+      .members-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .members-toolbar .btn {
+        width: 100%;
+      }
+
+      .actions .btn span {
+        display: none;
+      }
+
+      .modal {
+        border-radius: 16px;
+      }
+    }
   </style>
 </head>
 
@@ -844,589 +853,254 @@
 
 <div class="app">
 
-  <!-- ==================================
+  <!-- =========================
        SIDEBAR
-  ================================== -->
+  ========================== -->
+  <aside class="sidebar" id="sidebar">
 
-  <aside class="sidebar">
-
-    <div class="logo">
-
+    <div class="brand">
       <img
         src="https://image-namanhstudio.weebly.com/uploads/1/5/5/3/155356283/icon-echec-lezay_orig.png"
-        alt="Logo"
+        alt="Logo Atelier Jeu d'Échecs Lezay"
       />
 
-      <div>
-        <strong>
-          ATELIER ÉCHECS<br>
-          LEZAY
-        </strong>
-
-        <span>
-          Administration
-        </span>
+      <div class="brand-text">
+        <strong>Échecs Lezay</strong>
+        <span>Administration</span>
       </div>
-
     </div>
 
+    <div class="sidebar-label">Administration</div>
 
-    <div class="side-label">
-      Administration
-    </div>
+    <nav class="nav">
+      <button class="active" onclick="showDashboard()">
+        <span class="nav-icon">⌂</span>
+        Tableau de bord
+      </button>
 
-
-    <nav class="side-nav">
-
-      <button
-        class="active"
-        type="button"
-        id="navMembers"
-      >
-        <span class="side-icon">♟</span>
+      <button onclick="openMembersModal()">
+        <span class="nav-icon">♟</span>
         Membres
       </button>
-
-      <button
-        type="button"
-        id="navAdd"
-      >
-        <span class="side-icon">＋</span>
-        Ajouter un élève
-      </button>
-
     </nav>
-
 
     <div class="sidebar-bottom">
 
-      <div class="admin-user">
-
-        <div
-          class="admin-email"
-          id="adminEmail"
-        >
-          Connexion...
-        </div>
-
-        <button
-          class="logout-btn"
-          id="logoutButton"
-          type="button"
-        >
-          Se déconnecter
-        </button>
-
+      <div class="admin-card">
+        <small>Compte connecté</small>
+        <div id="adminEmail">Chargement...</div>
       </div>
 
-    </div>
+      <button class="logout-btn" onclick="logout()">
+        Se déconnecter
+      </button>
 
+    </div>
   </aside>
 
 
-  <!-- ==================================
+  <!-- =========================
        MAIN
-  ================================== -->
-
+  ========================== -->
   <main class="main">
 
-    <div class="main-inner">
+    <header class="topbar">
 
-      <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button
+          class="mobile-menu"
+          onclick="toggleSidebar()"
+          aria-label="Menu"
+        >
+          ☰
+        </button>
 
-        <div>
-          <div class="page-kicker">
-            Administration · Club d'échecs
-          </div>
+        <div class="page-title">
+          <h1>Administration</h1>
+          <p>Atelier Jeu d'Échecs Lezay</p>
+        </div>
+      </div>
 
-          <h1>
-            Membres
-          </h1>
+      <div class="top-actions">
+        <button class="btn" onclick="refreshMembers()">
+          ↻ Actualiser
+        </button>
+
+        <button class="btn btn-black" onclick="openMembersModal()">
+          Voir les membres
+        </button>
+      </div>
+
+    </header>
+
+
+    <section class="content">
+
+      <div class="welcome">
+        <h2>Bonjour 👋</h2>
+        <p>
+          Gérez simplement les membres inscrits au club.
+        </p>
+      </div>
+
+
+      <!-- STATS -->
+      <div class="stats">
+
+        <div class="stat">
+          <div class="stat-label">Membres inscrits</div>
+          <div class="stat-value" id="totalMembers">—</div>
         </div>
 
-        <div class="top-actions">
+        <div class="stat">
+          <div class="stat-label">Dernière inscription</div>
+          <div class="stat-value" id="latestRegistration">—</div>
+        </div>
 
-          <button
-            class="btn btn-light"
-            id="refreshButton"
-            type="button"
+        <div class="stat">
+          <div class="stat-label">Statut</div>
+          <div
+            class="stat-value"
+            style="font-size:21px;"
+            id="connectionStatus"
           >
-            ↻ Actualiser
-          </button>
-
-          <button
-            class="btn btn-dark"
-            id="addStudentButton"
-            type="button"
-          >
-            ＋ Ajouter un élève
-          </button>
-
+            Connexion...
+          </div>
         </div>
 
       </div>
 
 
-      <!-- ==================================
-           STATS
-      ================================== -->
+      <!-- RECENT MEMBERS -->
+      <div class="dashboard-card">
 
-      <section class="stats">
-
-        <article class="stat-card">
-
-          <span>
-            Membres
-          </span>
-
-          <strong id="totalStudents">
-            —
-          </strong>
-
-          <p>
-            Élèves inscrits
-          </p>
-
-        </article>
-
-
-        <article class="stat-card">
-
-          <span>
-            Dernière inscription
-          </span>
-
-          <strong id="latestStudent">
-            —
-          </strong>
-
-          <p id="latestDate">
-            —
-          </p>
-
-        </article>
-
-
-        <article class="stat-card">
-
-          <span>
-            Classes représentées
-          </span>
-
-          <strong id="classCount">
-            —
-          </strong>
-
-          <p>
-            6e · 5e · 4e · 3e
-          </p>
-
-        </article>
-
-      </section>
-
-
-      <!-- ==================================
-           MEMBERS PANEL
-      ================================== -->
-
-      <section class="panel">
-
-        <div class="panel-header">
-
-          <div class="panel-title">
-
-            <h2>
-              Liste des élèves
-            </h2>
-
-            <p>
-              Consultez et gérez les membres de l'atelier.
-            </p>
-
+        <div class="card-header">
+          <div>
+            <h3>Derniers membres inscrits</h3>
+            <span>Les inscriptions les plus récentes</span>
           </div>
 
+          <button
+            class="btn btn-small"
+            onclick="openMembersModal()"
+          >
+            Tout voir
+          </button>
+        </div>
 
-          <div class="search">
-
-            <span class="search-icon">
-              ⌕
-            </span>
-
-            <input
-              type="search"
-              id="searchInput"
-              placeholder="Rechercher un élève..."
-            />
-
+        <div id="recentMembersContainer">
+          <div class="loading">
+            <div class="spinner"></div>
+            Chargement des membres...
           </div>
-
         </div>
 
+      </div>
 
-        <div class="table-wrap">
-
-          <table>
-
-            <thead>
-
-              <tr>
-
-                <th>
-                  Élève
-                </th>
-
-                <th>
-                  Classe
-                </th>
-
-                <th>
-                  E-mail
-                </th>
-
-                <th>
-                  Inscription
-                </th>
-
-                <th>
-                  Actions
-                </th>
-
-              </tr>
-
-            </thead>
-
-            <tbody id="studentsTableBody">
-
-              <tr>
-                <td
-                  colspan="5"
-                  class="loading"
-                >
-                  Chargement des membres...
-                </td>
-              </tr>
-
-            </tbody>
-
-          </table>
-
-        </div>
-
-      </section>
-
-    </div>
+    </section>
 
   </main>
 
 </div>
 
 
-<!-- ==================================
-     CONNECTION STATUS
-================================== -->
+<!-- ==================================================
+     MEMBERS MODAL
+================================================== -->
 
-<div
-  class="connection"
-  id="connectionStatus"
->
+<div class="modal-overlay" id="membersModal">
 
-  <span class="connection-dot"></span>
-
-  <span id="connectionText">
-    Connexion...
-  </span>
-
-</div>
-
-
-<!-- ==================================
-     ADD / EDIT MODAL
-================================== -->
-
-<div
-  class="modal-overlay"
-  id="formModal"
->
-
-  <div class="modal">
+  <div class="modal large">
 
     <div class="modal-header">
-
       <div>
-
-        <h2 id="formModalTitle">
-          Ajouter un élève
-        </h2>
-
-        <p id="formModalDescription">
-          Ajoutez un nouveau membre à l'atelier.
-        </p>
-
+        <h2>Membres</h2>
+        <div style="font-size:11px;color:#888;margin-top:3px;">
+          Liste complète des inscrits
+        </div>
       </div>
 
-      <button
-        class="close"
-        type="button"
-        data-close="formModal"
-      >
+      <button class="close" onclick="closeModal('membersModal')">
         ×
       </button>
-
     </div>
 
+    <div class="modal-body">
 
-    <form id="studentForm">
+      <div class="members-toolbar">
 
-      <input
-        type="hidden"
-        id="studentId"
-      />
-
-
-      <div class="form-grid">
-
-        <div class="field">
-
-          <label for="firstName">
-            Prénom *
-          </label>
-
+        <div class="search">
           <input
-            id="firstName"
-            type="text"
-            required
-            placeholder="Prénom"
+            type="search"
+            id="searchInput"
+            placeholder="Rechercher par nom, prénom ou classe..."
+            oninput="filterMembers()"
           />
-
         </div>
 
-
-        <div class="field">
-
-          <label for="lastName">
-            Nom *
-          </label>
-
-          <input
-            id="lastName"
-            type="text"
-            required
-            placeholder="Nom"
-          />
-
-        </div>
-
-
-        <div class="field">
-
-          <label for="className">
-            Classe *
-          </label>
-
-          <select
-            id="className"
-            required
-          >
-
-            <option value="">
-              Sélectionner
-            </option>
-
-            <option value="6e">
-              6e
-            </option>
-
-            <option value="5e">
-              5e
-            </option>
-
-            <option value="4e">
-              4e
-            </option>
-
-            <option value="3e">
-              3e
-            </option>
-
-          </select>
-
-        </div>
-
-
-        <div class="field">
-
-          <label for="email">
-            E-mail
-          </label>
-
-          <input
-            id="email"
-            type="email"
-            placeholder="Facultatif"
-          />
-
-        </div>
-
-
-        <div class="field full">
-
-          <label for="message">
-            Message
-          </label>
-
-          <textarea
-            id="message"
-            placeholder="Informations complémentaires..."
-          ></textarea>
-
-        </div>
-
-      </div>
-
-
-      <div
-        class="message"
-        id="formError"
-      ></div>
-
-
-      <div class="modal-actions">
-
-        <button
-          class="btn btn-light"
-          type="button"
-          data-close="formModal"
-        >
-          Annuler
-        </button>
-
-        <button
-          class="btn btn-dark"
-          id="saveStudentButton"
-          type="submit"
-        >
-          Ajouter l'élève
+        <button class="btn" onclick="refreshMembers()">
+          ↻ Actualiser
         </button>
 
       </div>
 
-    </form>
+      <div id="membersTableContainer">
+        <div class="loading">
+          <div class="spinner"></div>
+          Chargement...
+        </div>
+      </div>
+
+    </div>
 
   </div>
 
 </div>
 
 
-<!-- ==================================
-     DETAILS MODAL
-================================== -->
+<!-- ==================================================
+     DETAIL MODAL
+================================================== -->
 
-<div
-  class="modal-overlay"
-  id="detailsModal"
->
+<div class="modal-overlay" id="detailModal">
 
   <div class="modal">
 
     <div class="modal-header">
 
       <div>
-
-        <h2>
-          Détails de l'élève
-        </h2>
-
-        <p>
-          Informations enregistrées dans le club.
-        </p>
-
+        <h2>Détails du membre</h2>
       </div>
 
-      <button
-        class="close"
-        type="button"
-        data-close="detailsModal"
-      >
+      <button class="close" onclick="closeModal('detailModal')">
         ×
       </button>
 
     </div>
 
+    <div class="modal-body" id="detailContent">
+      <!-- Dynamically generated -->
+    </div>
 
-    <div
-      class="detail-list"
-      id="detailsContent"
-    ></div>
-
-
-    <div class="modal-actions">
+    <div class="modal-footer">
 
       <button
-        class="btn btn-light"
-        type="button"
-        data-close="detailsModal"
+        class="btn"
+        onclick="closeModal('detailModal')"
       >
         Fermer
       </button>
 
       <button
-        class="btn btn-dark"
-        type="button"
-        id="detailsEditButton"
+        class="btn btn-black"
+        onclick="editCurrentMember()"
       >
         Modifier
       </button>
 
-    </div>
-
-  </div>
-
-</div>
-
-
-<!-- ==================================
-     DELETE MODAL
-================================== -->
-
-<div
-  class="modal-overlay"
-  id="deleteModal"
->
-
-  <div class="modal">
-
-    <div class="delete-warning">
-
-      <div class="warning-icon">
-        !
-      </div>
-
-      <h2>
-        Supprimer cet élève ?
-      </h2>
-
-      <p id="deleteText">
-        Cette action est définitive.
-      </p>
-
-    </div>
-
-
-    <div class="modal-actions">
-
-      <button
-        class="btn btn-light"
-        type="button"
-        data-close="deleteModal"
-      >
-        Annuler
-      </button>
-
       <button
         class="btn btn-danger"
-        id="confirmDelete"
-        type="button"
+        onclick="deleteCurrentMember()"
       >
         Supprimer
       </button>
@@ -1438,1263 +1112,1216 @@
 </div>
 
 
+<!-- ==================================================
+     EDIT MODAL
+================================================== -->
+
+<div class="modal-overlay" id="editModal">
+
+  <div class="modal">
+
+    <div class="modal-header">
+
+      <div>
+        <h2>Modifier le membre</h2>
+        <div style="font-size:11px;color:#888;margin-top:3px;">
+          Modifiez les informations puis enregistrez.
+        </div>
+      </div>
+
+      <button class="close" onclick="closeModal('editModal')">
+        ×
+      </button>
+
+    </div>
+
+    <form id="editForm" onsubmit="saveMember(event)">
+
+      <div class="modal-body">
+
+        <div class="form-grid">
+
+          <div class="form-group">
+            <label for="editFirstName">Prénom</label>
+            <input
+              id="editFirstName"
+              type="text"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="editLastName">Nom</label>
+            <input
+              id="editLastName"
+              type="text"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="editClass">Classe</label>
+            <input
+              id="editClass"
+              type="text"
+              required
+              placeholder="Ex : 5e B"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="editEmail">Email</label>
+            <input
+              id="editEmail"
+              type="email"
+              placeholder="email@example.com"
+            />
+          </div>
+
+          <div class="form-group full">
+            <label for="editMessage">Message</label>
+            <textarea
+              id="editMessage"
+              placeholder="Message ou informations complémentaires..."
+            ></textarea>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+
+        <button
+          type="button"
+          class="btn"
+          onclick="closeModal('editModal')"
+        >
+          Annuler
+        </button>
+
+        <button
+          type="submit"
+          class="btn btn-black"
+          id="saveButton"
+        >
+          Enregistrer
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+
+<!-- ==================================================
+     DELETE MODAL
+================================================== -->
+
+<div class="modal-overlay" id="deleteModal">
+
+  <div class="modal" style="max-width:430px;">
+
+    <div class="modal-header">
+      <h2>Supprimer le membre</h2>
+
+      <button class="close" onclick="closeModal('deleteModal')">
+        ×
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <div class="delete-warning">
+
+        <div class="warning-icon">
+          !
+        </div>
+
+        <h3>Êtes-vous sûr ?</h3>
+
+        <p>
+          Vous êtes sur le point de supprimer
+          <strong id="deleteMemberName"></strong>.
+          Cette action est définitive.
+        </p>
+
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+
+      <button
+        class="btn"
+        onclick="closeModal('deleteModal')"
+      >
+        Annuler
+      </button>
+
+      <button
+        class="btn btn-danger"
+        id="confirmDeleteButton"
+        onclick="confirmDelete()"
+      >
+        Supprimer définitivement
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+
 <script>
+/* =====================================================
+   SUPABASE CONFIG
+===================================================== */
 
-  /* ==================================================
-     SUPABASE CONFIG
-  ================================================== */
+const SUPABASE_URL =
+  "https://mulwdqtyojndrjbpgldk.supabase.co";
 
-  const SUPABASE_URL =
-    "https://mulwdqtyojndrjbpgldk.supabase.co";
+const SUPABASE_KEY =
+  "sb_publishable_AdZl_u0YAK2xSiv3pX74iA_Q2GMnIwz";
 
-  const SUPABASE_ANON_KEY =
-    "sb_publishable_AdZl_u0YAK2xSiv3pX74iA_Q2GMnIwz";
-
-
-  /* ==================================================
-     STATE
-  ================================================== */
-
-  let students = [];
-
-  let selectedStudent = null;
-
-  let deleteStudentId = null;
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
 
-  /* ==================================================
-     DOM
-  ================================================== */
+/* =====================================================
+   GLOBAL STATE
+===================================================== */
 
-  const tableBody =
-    document.getElementById(
-      "studentsTableBody"
-    );
-
-  const searchInput =
-    document.getElementById(
-      "searchInput"
-    );
-
-  const totalStudents =
-    document.getElementById(
-      "totalStudents"
-    );
-
-  const latestStudent =
-    document.getElementById(
-      "latestStudent"
-    );
-
-  const latestDate =
-    document.getElementById(
-      "latestDate"
-    );
-
-  const classCount =
-    document.getElementById(
-      "classCount"
-    );
-
-  const connectionStatus =
-    document.getElementById(
-      "connectionStatus"
-    );
-
-  const connectionText =
-    document.getElementById(
-      "connectionText"
-    );
+let members = [];
+let filteredMembers = [];
+let currentMember = null;
+let memberToDelete = null;
 
 
-  /* ==================================================
-     SUPABASE FETCH
-  ================================================== */
+/* =====================================================
+   INIT
+===================================================== */
 
-  async function supabaseFetch(
-    endpoint,
-    options = {}
-  ) {
+document.addEventListener("DOMContentLoaded", async () => {
 
-    const response =
-      await fetch(
-        SUPABASE_URL + endpoint,
-        {
-          ...options,
+  await checkAuth();
 
-          headers: {
-            "apikey":
-              SUPABASE_ANON_KEY,
+  setupRealtime();
 
-            "Authorization":
-              "Bearer " +
-              SUPABASE_ANON_KEY,
-
-            "Content-Type":
-              "application/json",
-
-            ...(options.headers || {})
-          }
-        }
-      );
-
-    return response;
-
-  }
+});
 
 
-  /* ==================================================
-     AUTH
-  ================================================== */
+/* =====================================================
+   AUTH
+===================================================== */
 
-  async function getSession() {
+async function checkAuth() {
 
-    const response =
-      await supabaseFetch(
-        "/auth/v1/user"
-      );
+  try {
 
-    if (!response.ok) {
-      return null;
+    const {
+      data: { session },
+      error
+    } = await supabaseClient.auth.getSession();
+
+    if (error) {
+      throw error;
     }
 
-    return await response.json();
+    if (!session) {
 
-  }
+      window.location.href = "login.html";
 
-
-  async function requireAuth() {
-
-    const user =
-      await getSession();
-
-    if (!user || !user.id) {
-
-      window.location.href =
-        "login.html";
-
-      return null;
-
+      return;
     }
 
-    document.getElementById(
-      "adminEmail"
-    ).textContent =
-      user.email || "Administrateur";
+    document.getElementById("adminEmail").textContent =
+      session.user.email || "Administrateur";
 
-    return user;
+    document.getElementById("connectionStatus").textContent =
+      "Connecté";
+
+    await loadMembers();
+
+  } catch (error) {
+
+    console.error(error);
+
+    showToast(
+      "Impossible de vérifier la connexion.",
+      true
+    );
+
+    document.getElementById("connectionStatus").textContent =
+      "Erreur";
 
   }
 
+}
 
-  /* ==================================================
-     LOAD STUDENTS
-  ================================================== */
 
-  async function loadStudents() {
+/* =====================================================
+   LOAD MEMBERS
+===================================================== */
 
-    setConnection(
-      "Chargement...",
-      false
-    );
+async function loadMembers() {
 
-    tableBody.innerHTML = `
-      <tr>
-        <td colspan="5" class="loading">
-          Chargement des membres...
-        </td>
-      </tr>
+  const container =
+    document.getElementById("recentMembersContainer");
+
+  container.innerHTML = `
+    <div class="loading">
+      <div class="spinner"></div>
+      Chargement des membres...
+    </div>
+  `;
+
+  try {
+
+    const {
+      data,
+      error
+    } = await supabaseClient
+      .from("students")
+      .select("*")
+      .order("registered_at", {
+        ascending: false
+      });
+
+    if (error) {
+      throw error;
+    }
+
+    members = data || [];
+    filteredMembers = [...members];
+
+    updateStats();
+    renderRecentMembers();
+    renderMembersTable();
+
+  } catch (error) {
+
+    console.error(error);
+
+    container.innerHTML = `
+      <div class="empty">
+        <strong>Impossible de charger les membres</strong>
+        <span>${escapeHtml(error.message)}</span>
+      </div>
     `;
 
-    try {
-
-      const response =
-        await supabaseFetch(
-          "/rest/v1/students?select=*&order=registered_at.desc"
-        );
-
-      if (!response.ok) {
-
-        const error =
-          await response.text();
-
-        console.error(error);
-
-        throw new Error(
-          "Impossible de charger les élèves."
-        );
-
-      }
-
-      students =
-        await response.json();
-
-      renderStudents();
-
-      updateStats();
-
-      setConnection(
-        "Connecté à Supabase",
-        false
-      );
-
-    } catch (error) {
-
-      console.error(error);
-
-      tableBody.innerHTML = `
-        <tr>
-          <td colspan="5">
-            <div class="empty">
-              <strong>
-                Impossible de charger les membres
-              </strong>
-              Vérifiez votre connexion et les policies RLS de Supabase.
-            </div>
-          </td>
-        </tr>
-      `;
-
-      setConnection(
-        "Erreur de connexion",
-        true
-      );
-
-    }
+    document.getElementById("membersTableContainer").innerHTML = `
+      <div class="empty">
+        <strong>Erreur de chargement</strong>
+        <span>${escapeHtml(error.message)}</span>
+      </div>
+    `;
 
   }
 
-
-  /* ==================================================
-     RENDER
-  ================================================== */
-
-  function renderStudents() {
-
-    const query =
-      searchInput.value
-        .trim()
-        .toLowerCase();
+}
 
 
-    const filtered =
-      students.filter(student => {
+/* =====================================================
+   STATS
+===================================================== */
 
-        const fullName =
-          `${student.first_name || ""} ${student.last_name || ""}`
-            .toLowerCase();
+function updateStats() {
 
-        const email =
-          (student.email || "")
-            .toLowerCase();
+  document.getElementById("totalMembers").textContent =
+    members.length;
 
-        const className =
-          (student.class_name || "")
-            .toLowerCase();
+  if (members.length > 0) {
 
-        return (
-          fullName.includes(query) ||
-          email.includes(query) ||
-          className.includes(query)
-        );
+    const latest = members[0];
+
+    document.getElementById("latestRegistration").textContent =
+      formatDateShort(latest.registered_at);
+
+  } else {
+
+    document.getElementById("latestRegistration").textContent =
+      "—";
+
+  }
+
+}
+
+
+/* =====================================================
+   RECENT MEMBERS
+===================================================== */
+
+function renderRecentMembers() {
+
+  const container =
+    document.getElementById("recentMembersContainer");
+
+  if (!members.length) {
+
+    container.innerHTML = `
+      <div class="empty">
+        <strong>Aucun membre</strong>
+        <span>Les nouvelles inscriptions apparaîtront ici.</span>
+      </div>
+    `;
+
+    return;
+  }
+
+  const recent = members.slice(0, 8);
+
+  container.innerHTML = `
+    <div class="table-wrap">
+      <table>
+
+        <thead>
+          <tr>
+            <th>Membre</th>
+            <th>Classe</th>
+            <th>Email</th>
+            <th>Inscription</th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          ${recent.map(member => `
+            <tr>
+
+              <td>
+                <div class="member-name">
+                  ${escapeHtml(fullName(member))}
+                </div>
+
+                <div class="member-id">
+                  ${escapeHtml(member.id)}
+                </div>
+              </td>
+
+              <td>
+                <span class="class-badge">
+                  ${escapeHtml(member.class_name || "—")}
+                </span>
+              </td>
+
+              <td>
+                ${escapeHtml(member.email || "—")}
+              </td>
+
+              <td>
+                <span class="date">
+                  ${formatDate(member.registered_at)}
+                </span>
+              </td>
+
+              <td>
+                <div class="actions">
+                  <button
+                    class="btn btn-small"
+                    onclick="viewMember('${member.id}')"
+                  >
+                    Voir
+                  </button>
+                </div>
+              </td>
+
+            </tr>
+          `).join("")}
+
+        </tbody>
+
+      </table>
+    </div>
+  `;
+
+}
+
+
+/* =====================================================
+   MEMBERS TABLE
+===================================================== */
+
+function renderMembersTable() {
+
+  const container =
+    document.getElementById("membersTableContainer");
+
+  if (!filteredMembers.length) {
+
+    container.innerHTML = `
+      <div class="empty">
+        <strong>Aucun membre trouvé</strong>
+        <span>
+          Essayez avec un autre nom, prénom ou classe.
+        </span>
+      </div>
+    `;
+
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Membre</th>
+            <th>Classe</th>
+            <th>Email</th>
+            <th>Inscription</th>
+            <th style="text-align:right;">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          ${filteredMembers.map(member => `
+
+            <tr>
+
+              <td>
+                <div class="member-name">
+                  ${escapeHtml(fullName(member))}
+                </div>
+
+                <div class="member-id">
+                  ID : ${escapeHtml(member.id)}
+                </div>
+              </td>
+
+              <td>
+                <span class="class-badge">
+                  ${escapeHtml(member.class_name || "—")}
+                </span>
+              </td>
+
+              <td>
+                ${escapeHtml(member.email || "—")}
+              </td>
+
+              <td>
+                <span class="date">
+                  ${formatDate(member.registered_at)}
+                </span>
+              </td>
+
+              <td>
+
+                <div class="actions">
+
+                  <button
+                    class="btn btn-small"
+                    onclick="viewMember('${member.id}')"
+                  >
+                    Voir
+                  </button>
+
+                  <button
+                    class="btn btn-small"
+                    onclick="editMember('${member.id}')"
+                  >
+                    Modifier
+                  </button>
+
+                  <button
+                    class="btn btn-danger btn-small"
+                    onclick="askDelete('${member.id}')"
+                  >
+                    Supprimer
+                  </button>
+
+                </div>
+
+              </td>
+
+            </tr>
+
+          `).join("")}
+
+        </tbody>
+
+      </table>
+
+    </div>
+  `;
+
+}
+
+
+/* =====================================================
+   SEARCH
+===================================================== */
+
+function filterMembers() {
+
+  const query =
+    document
+      .getElementById("searchInput")
+      .value
+      .toLowerCase()
+      .trim();
+
+  if (!query) {
+
+    filteredMembers = [...members];
+
+  } else {
+
+    filteredMembers =
+      members.filter(member => {
+
+        const searchable = [
+          member.first_name,
+          member.last_name,
+          member.class_name,
+          member.email
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        return searchable.includes(query);
 
       });
 
-
-    if (!filtered.length) {
-
-      tableBody.innerHTML = `
-        <tr>
-          <td colspan="5">
-            <div class="empty">
-              <strong>
-                Aucun élève trouvé
-              </strong>
-              ${
-                query
-                  ? "Essayez une autre recherche."
-                  : "Ajoutez votre premier élève."
-              }
-            </div>
-          </td>
-        </tr>
-      `;
-
-      return;
-
-    }
-
-
-    tableBody.innerHTML =
-      filtered.map(student => {
-
-        const name =
-          `${escapeHTML(student.first_name || "")}
-           ${escapeHTML(student.last_name || "")}`;
-
-        const email =
-          student.email
-            ? escapeHTML(student.email)
-            : "—";
-
-        const date =
-          formatDate(
-            student.registered_at
-          );
-
-
-        return `
-          <tr>
-
-            <td>
-              <div class="student-name">
-                ${name}
-              </div>
-            </td>
-
-            <td>
-              <span class="class-badge">
-                ${escapeHTML(student.class_name || "—")}
-              </span>
-            </td>
-
-            <td>
-              <span class="student-email">
-                ${email}
-              </span>
-            </td>
-
-            <td>
-              <span class="date">
-                ${date}
-              </span>
-            </td>
-
-            <td>
-
-              <div class="row-actions">
-
-                <button
-                  class="icon-btn"
-                  title="Voir"
-                  onclick="viewStudent('${student.id}')"
-                >
-                  👁
-                </button>
-
-                <button
-                  class="icon-btn"
-                  title="Modifier"
-                  onclick="editStudent('${student.id}')"
-                >
-                  ✎
-                </button>
-
-                <button
-                  class="icon-btn delete"
-                  title="Supprimer"
-                  onclick="askDelete('${student.id}')"
-                >
-                  ×
-                </button>
-
-              </div>
-
-            </td>
-
-          </tr>
-        `;
-
-      }).join("");
-
   }
 
+  renderMembersTable();
 
-  /* ==================================================
-     STATS
-  ================================================== */
-
-  function updateStats() {
-
-    totalStudents.textContent =
-      students.length;
+}
 
 
-    if (students.length) {
+/* =====================================================
+   OPEN MEMBERS MODAL
+===================================================== */
 
-      const latest =
-        students[0];
-
-      latestStudent.textContent =
-        `${latest.first_name || ""}
-         ${latest.last_name || ""}`.trim();
-
-      latestDate.textContent =
-        formatDate(
-          latest.registered_at
-        );
-
-    } else {
-
-      latestStudent.textContent =
-        "—";
-
-      latestDate.textContent =
-        "Aucune inscription";
-
-    }
-
-
-    const classes =
-      new Set(
-        students
-          .map(s => s.class_name)
-          .filter(Boolean)
-      );
-
-    classCount.textContent =
-      classes.size;
-
-  }
-
-
-  /* ==================================================
-     ADD STUDENT
-  ================================================== */
-
-  function openAddModal() {
-
-    selectedStudent = null;
-
-    document.getElementById(
-      "formModalTitle"
-    ).textContent =
-      "Ajouter un élève";
-
-    document.getElementById(
-      "formModalDescription"
-    ).textContent =
-      "Ajoutez un nouveau membre à l'atelier.";
-
-    document.getElementById(
-      "saveStudentButton"
-    ).textContent =
-      "Ajouter l'élève";
-
-    document.getElementById(
-      "studentForm"
-    ).reset();
-
-    document.getElementById(
-      "studentId"
-    ).value = "";
-
-    hideError();
-
-    openModal("formModal");
-
-    setTimeout(() => {
-
-      document.getElementById(
-        "firstName"
-      ).focus();
-
-    }, 100);
-
-  }
-
-
-  /* ==================================================
-     EDIT STUDENT
-  ================================================== */
-
-  function editStudent(id) {
-
-    const student =
-      students.find(
-        item => item.id === id
-      );
-
-    if (!student) {
-      return;
-    }
-
-    selectedStudent =
-      student;
-
-
-    document.getElementById(
-      "formModalTitle"
-    ).textContent =
-      "Modifier l'élève";
-
-
-    document.getElementById(
-      "formModalDescription"
-    ).textContent =
-      "Modifiez les informations de ce membre.";
-
-
-    document.getElementById(
-      "saveStudentButton"
-    ).textContent =
-      "Enregistrer";
-
-
-    document.getElementById(
-      "studentId"
-    ).value =
-      student.id;
-
-
-    document.getElementById(
-      "firstName"
-    ).value =
-      student.first_name || "";
-
-
-    document.getElementById(
-      "lastName"
-    ).value =
-      student.last_name || "";
-
-
-    document.getElementById(
-      "className"
-    ).value =
-      student.class_name || "";
-
-
-    document.getElementById(
-      "email"
-    ).value =
-      student.email || "";
-
-
-    document.getElementById(
-      "message"
-    ).value =
-      student.message || "";
-
-
-    hideError();
-
-    closeModal("detailsModal");
-
-    openModal("formModal");
-
-  }
-
-
-  /* ==================================================
-     SAVE STUDENT
-  ================================================== */
+function openMembersModal() {
 
   document
-    .getElementById("studentForm")
-    .addEventListener(
-      "submit",
-      async event => {
+    .getElementById("membersModal")
+    .classList.add("open");
 
-        event.preventDefault();
+  document.body.style.overflow = "hidden";
 
-        const button =
-          document.getElementById(
-            "saveStudentButton"
-          );
+  document.getElementById("searchInput").value = "";
 
-        button.disabled = true;
+  filteredMembers = [...members];
 
-        button.textContent =
-          "Enregistrement...";
+  renderMembersTable();
 
-        hideError();
+}
 
 
-        const id =
-          document.getElementById(
-            "studentId"
-          ).value;
+/* =====================================================
+   VIEW MEMBER
+===================================================== */
+
+function viewMember(id) {
+
+  const member =
+    members.find(item => item.id === id);
+
+  if (!member) return;
+
+  currentMember = member;
+
+  const initials =
+    `${member.first_name?.[0] || ""}${member.last_name?.[0] || ""}`
+      .toUpperCase();
+
+  document.getElementById("detailContent").innerHTML = `
+
+    <div class="detail-head">
+
+      <div class="avatar">
+        ${escapeHtml(initials || "♟")}
+      </div>
+
+      <div>
+        <h3>
+          ${escapeHtml(fullName(member))}
+        </h3>
+
+        <p>
+          ${escapeHtml(member.class_name || "Classe non renseignée")}
+        </p>
+      </div>
+
+    </div>
 
 
-        const payload = {
+    <div class="detail-grid">
 
-          first_name:
-            document
-              .getElementById("firstName")
-              .value
-              .trim(),
+      <div class="detail-item">
 
-          last_name:
-            document
-              .getElementById("lastName")
-              .value
-              .trim(),
+        <div class="detail-label">
+          Prénom
+        </div>
 
-          class_name:
-            document
-              .getElementById("className")
-              .value,
+        <div class="detail-value">
+          ${escapeHtml(member.first_name || "—")}
+        </div>
 
-          email:
-            document
-              .getElementById("email")
-              .value
-              .trim() || null,
-
-          message:
-            document
-              .getElementById("message")
-              .value
-              .trim() || null
-
-        };
+      </div>
 
 
-        try {
+      <div class="detail-item">
 
-          let response;
+        <div class="detail-label">
+          Nom
+        </div>
 
+        <div class="detail-value">
+          ${escapeHtml(member.last_name || "—")}
+        </div>
 
-          if (id) {
-
-            /*
-              UPDATE
-            */
-
-            response =
-              await supabaseFetch(
-                `/rest/v1/students?id=eq.${encodeURIComponent(id)}`,
-                {
-                  method: "PATCH",
-
-                  headers: {
-                    "Prefer":
-                      "return=representation"
-                  },
-
-                  body:
-                    JSON.stringify(
-                      payload
-                    )
-                }
-              );
-
-          } else {
-
-            /*
-              INSERT
-            */
-
-            response =
-              await supabaseFetch(
-                "/rest/v1/students",
-                {
-                  method: "POST",
-
-                  headers: {
-                    "Prefer":
-                      "return=representation"
-                  },
-
-                  body:
-                    JSON.stringify(
-                      payload
-                    )
-                }
-              );
-
-          }
+      </div>
 
 
-          if (!response.ok) {
+      <div class="detail-item">
 
-            const error =
-              await response.text();
+        <div class="detail-label">
+          Classe
+        </div>
 
-            console.error(error);
+        <div class="detail-value">
+          ${escapeHtml(member.class_name || "—")}
+        </div>
 
-            throw new Error(
-              "Erreur Supabase"
-            );
-
-          }
+      </div>
 
 
-          closeModal(
-            "formModal"
-          );
+      <div class="detail-item">
 
-          await loadStudents();
+        <div class="detail-label">
+          Email
+        </div>
 
-        } catch (error) {
+        <div class="detail-value">
+          ${escapeHtml(member.email || "—")}
+        </div>
 
-          console.error(error);
+      </div>
 
-          showError(
-            "Impossible d'enregistrer cet élève. Vérifiez les permissions Supabase."
-          );
 
-        } finally {
+      <div class="detail-item full">
 
-          button.disabled = false;
+        <div class="detail-label">
+          Date d'inscription
+        </div>
 
-          button.textContent =
-            id
-              ? "Enregistrer"
-              : "Ajouter l'élève";
+        <div class="detail-value">
+          ${formatDate(member.registered_at)}
+        </div>
 
-        }
+      </div>
 
+
+      <div class="detail-item full">
+
+        <div class="detail-label">
+          Message
+        </div>
+
+        <div class="detail-value">
+          ${escapeHtml(member.message || "Aucun message.")}
+        </div>
+
+      </div>
+
+
+      <div class="detail-item full">
+
+        <div class="detail-label">
+          Identifiant
+        </div>
+
+        <div
+          class="detail-value"
+          style="font-family:monospace;font-size:11px;"
+        >
+          ${escapeHtml(member.id)}
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+
+  closeModal("membersModal");
+
+  openModal("detailModal");
+
+}
+
+
+/* =====================================================
+   EDIT
+===================================================== */
+
+function editMember(id) {
+
+  const member =
+    members.find(item => item.id === id);
+
+  if (!member) return;
+
+  currentMember = member;
+
+  document.getElementById("editFirstName").value =
+    member.first_name || "";
+
+  document.getElementById("editLastName").value =
+    member.last_name || "";
+
+  document.getElementById("editClass").value =
+    member.class_name || "";
+
+  document.getElementById("editEmail").value =
+    member.email || "";
+
+  document.getElementById("editMessage").value =
+    member.message || "";
+
+  closeModal("membersModal");
+
+  openModal("editModal");
+
+}
+
+
+function editCurrentMember() {
+
+  if (!currentMember) return;
+
+  closeModal("detailModal");
+
+  editMember(currentMember.id);
+
+}
+
+
+/* =====================================================
+   SAVE EDIT
+===================================================== */
+
+async function saveMember(event) {
+
+  event.preventDefault();
+
+  if (!currentMember) return;
+
+  const button =
+    document.getElementById("saveButton");
+
+  button.disabled = true;
+  button.textContent = "Enregistrement...";
+
+  const updatedData = {
+
+    first_name:
+      document.getElementById("editFirstName").value.trim(),
+
+    last_name:
+      document.getElementById("editLastName").value.trim(),
+
+    class_name:
+      document.getElementById("editClass").value.trim(),
+
+    email:
+      document.getElementById("editEmail").value.trim() || null,
+
+    message:
+      document.getElementById("editMessage").value.trim() || null
+
+  };
+
+  try {
+
+    const {
+      error
+    } = await supabaseClient
+      .from("students")
+      .update(updatedData)
+      .eq("id", currentMember.id);
+
+    if (error) {
+      throw error;
+    }
+
+    showToast("Membre modifié avec succès.");
+
+    closeModal("editModal");
+
+    await loadMembers();
+
+    currentMember = null;
+
+  } catch (error) {
+
+    console.error(error);
+
+    showToast(
+      "Erreur lors de la modification : " + error.message,
+      true
+    );
+
+  } finally {
+
+    button.disabled = false;
+    button.textContent = "Enregistrer";
+
+  }
+
+}
+
+
+/* =====================================================
+   DELETE
+===================================================== */
+
+function askDelete(id) {
+
+  const member =
+    members.find(item => item.id === id);
+
+  if (!member) return;
+
+  memberToDelete = member;
+
+  document.getElementById("deleteMemberName")
+    .textContent = fullName(member);
+
+  closeModal("membersModal");
+  closeModal("detailModal");
+
+  openModal("deleteModal");
+
+}
+
+
+function deleteCurrentMember() {
+
+  if (!currentMember) return;
+
+  askDelete(currentMember.id);
+
+}
+
+
+async function confirmDelete() {
+
+  if (!memberToDelete) return;
+
+  const button =
+    document.getElementById("confirmDeleteButton");
+
+  button.disabled = true;
+  button.textContent = "Suppression...";
+
+  try {
+
+    const {
+      error
+    } = await supabaseClient
+      .from("students")
+      .delete()
+      .eq("id", memberToDelete.id);
+
+    if (error) {
+      throw error;
+    }
+
+    showToast("Membre supprimé.");
+
+    closeModal("deleteModal");
+
+    await loadMembers();
+
+    memberToDelete = null;
+    currentMember = null;
+
+  } catch (error) {
+
+    console.error(error);
+
+    showToast(
+      "Erreur lors de la suppression : " + error.message,
+      true
+    );
+
+  } finally {
+
+    button.disabled = false;
+    button.textContent = "Supprimer définitivement";
+
+  }
+
+}
+
+
+/* =====================================================
+   REFRESH
+===================================================== */
+
+async function refreshMembers() {
+
+  await loadMembers();
+
+  showToast("Liste actualisée.");
+
+}
+
+
+/* =====================================================
+   MODALS
+===================================================== */
+
+function openModal(id) {
+
+  document
+    .getElementById(id)
+    .classList.add("open");
+
+  document.body.style.overflow = "hidden";
+
+}
+
+
+function closeModal(id) {
+
+  document
+    .getElementById(id)
+    .classList.remove("open");
+
+  const anyOpen =
+    document.querySelector(".modal-overlay.open");
+
+  if (!anyOpen) {
+    document.body.style.overflow = "";
+  }
+
+}
+
+
+/* Click outside modal */
+
+document.querySelectorAll(".modal-overlay")
+  .forEach(overlay => {
+
+    overlay.addEventListener("click", event => {
+
+      if (event.target === overlay) {
+        closeModal(overlay.id);
       }
-    );
-
-
-  /* ==================================================
-     VIEW STUDENT
-  ================================================== */
-
-  function viewStudent(id) {
-
-    const student =
-      students.find(
-        item => item.id === id
-      );
-
-    if (!student) {
-      return;
-    }
-
-    selectedStudent =
-      student;
-
-
-    document.getElementById(
-      "detailsContent"
-    ).innerHTML = `
-
-      <div class="detail-row">
-        <span>Prénom</span>
-        <strong>
-          ${escapeHTML(student.first_name || "—")}
-        </strong>
-      </div>
-
-      <div class="detail-row">
-        <span>Nom</span>
-        <strong>
-          ${escapeHTML(student.last_name || "—")}
-        </strong>
-      </div>
-
-      <div class="detail-row">
-        <span>Classe</span>
-        <strong>
-          ${escapeHTML(student.class_name || "—")}
-        </strong>
-      </div>
-
-      <div class="detail-row">
-        <span>E-mail</span>
-        <strong>
-          ${escapeHTML(student.email || "—")}
-        </strong>
-      </div>
-
-      <div class="detail-row">
-        <span>Message</span>
-        <strong>
-          ${escapeHTML(student.message || "—")}
-        </strong>
-      </div>
-
-      <div class="detail-row">
-        <span>Inscription</span>
-        <strong>
-          ${formatDate(student.registered_at)}
-        </strong>
-      </div>
-
-    `;
-
-
-    openModal(
-      "detailsModal"
-    );
-
-  }
-
-
-  /* ==================================================
-     DELETE
-  ================================================== */
-
-  function askDelete(id) {
-
-    const student =
-      students.find(
-        item => item.id === id
-      );
-
-    if (!student) {
-      return;
-    }
-
-    deleteStudentId =
-      id;
-
-
-    document.getElementById(
-      "deleteText"
-    ).textContent =
-      `Vous êtes sur le point de supprimer définitivement ${student.first_name || ""} ${student.last_name || ""}. Cette action est irréversible.`;
-
-
-    openModal(
-      "deleteModal"
-    );
-
-  }
-
-
-  document
-    .getElementById("confirmDelete")
-    .addEventListener(
-      "click",
-      async () => {
-
-        if (!deleteStudentId) {
-          return;
-        }
-
-        const button =
-          document.getElementById(
-            "confirmDelete"
-          );
-
-        button.disabled = true;
-
-        button.textContent =
-          "Suppression...";
-
-
-        try {
-
-          const response =
-            await supabaseFetch(
-              `/rest/v1/students?id=eq.${encodeURIComponent(deleteStudentId)}`,
-              {
-                method: "DELETE"
-              }
-            );
-
-
-          if (!response.ok) {
-
-            console.error(
-              await response.text()
-            );
-
-            throw new Error(
-              "Suppression impossible"
-            );
-
-          }
-
-
-          closeModal(
-            "deleteModal"
-          );
-
-          deleteStudentId =
-            null;
-
-          await loadStudents();
-
-        } catch (error) {
-
-          console.error(error);
-
-          alert(
-            "Impossible de supprimer cet élève."
-          );
-
-        } finally {
-
-          button.disabled = false;
-
-          button.textContent =
-            "Supprimer";
-
-        }
-
-      }
-    );
-
-
-  /* ==================================================
-     DETAILS EDIT
-  ================================================== */
-
-  document
-    .getElementById("detailsEditButton")
-    .addEventListener(
-      "click",
-      () => {
-
-        if (
-          selectedStudent &&
-          selectedStudent.id
-        ) {
-
-          editStudent(
-            selectedStudent.id
-          );
-
-        }
-
-      }
-    );
-
-
-  /* ==================================================
-     SEARCH
-  ================================================== */
-
-  searchInput.addEventListener(
-    "input",
-    renderStudents
-  );
-
-
-  /* ==================================================
-     REFRESH
-  ================================================== */
-
-  document
-    .getElementById("refreshButton")
-    .addEventListener(
-      "click",
-      async () => {
-
-        const button =
-          document.getElementById(
-            "refreshButton"
-          );
-
-        button.disabled = true;
-
-        button.textContent =
-          "↻ Chargement...";
-
-        await loadStudents();
-
-        button.disabled = false;
-
-        button.textContent =
-          "↻ Actualiser";
-
-      }
-    );
-
-
-  /* ==================================================
-     ADD BUTTONS
-  ================================================== */
-
-  document
-    .getElementById("addStudentButton")
-    .addEventListener(
-      "click",
-      openAddModal
-    );
-
-
-  document
-    .getElementById("navAdd")
-    .addEventListener(
-      "click",
-      openAddModal
-    );
-
-
-  document
-    .getElementById("navMembers")
-    .addEventListener(
-      "click",
-      () => {
-
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth"
-        });
-
-      }
-    );
-
-
-  /* ==================================================
-     MODALS
-  ================================================== */
-
-  function openModal(id) {
-
-    document
-      .getElementById(id)
-      .classList.add("open");
-
-    document.body.style.overflow =
-      "hidden";
-
-  }
-
-
-  function closeModal(id) {
-
-    document
-      .getElementById(id)
-      .classList.remove("open");
-
-    const anyOpen =
-      document.querySelector(
-        ".modal-overlay.open"
-      );
-
-    if (!anyOpen) {
-      document.body.style.overflow =
-        "";
-    }
-
-  }
-
-
-  document
-    .querySelectorAll("[data-close]")
-    .forEach(button => {
-
-      button.addEventListener(
-        "click",
-        () => {
-
-          closeModal(
-            button.dataset.close
-          );
-
-        }
-      );
 
     });
 
+  });
+
+
+/* Escape */
+
+document.addEventListener("keydown", event => {
+
+  if (event.key !== "Escape") return;
 
   document
-    .querySelectorAll(".modal-overlay")
-    .forEach(overlay => {
-
-      overlay.addEventListener(
-        "click",
-        event => {
-
-          if (
-            event.target === overlay
-          ) {
-
-            closeModal(
-              overlay.id
-            );
-
-          }
-
-        }
-      );
-
+    .querySelectorAll(".modal-overlay.open")
+    .forEach(modal => {
+      closeModal(modal.id);
     });
 
-
-  document.addEventListener(
-    "keydown",
-    event => {
-
-      if (
-        event.key === "Escape"
-      ) {
-
-        document
-          .querySelectorAll(
-            ".modal-overlay.open"
-          )
-          .forEach(modal => {
-
-            closeModal(
-              modal.id
-            );
-
-          });
-
-      }
-
-    }
-  );
+});
 
 
-  /* ==================================================
-     LOGOUT
-  ================================================== */
+/* =====================================================
+   SIDEBAR
+===================================================== */
+
+function toggleSidebar() {
 
   document
-    .getElementById("logoutButton")
-    .addEventListener(
-      "click",
+    .getElementById("sidebar")
+    .classList.toggle("open");
+
+}
+
+
+function showDashboard() {
+
+  document
+    .getElementById("sidebar")
+    .classList.remove("open");
+
+}
+
+
+/* =====================================================
+   LOGOUT
+===================================================== */
+
+async function logout() {
+
+  try {
+
+    await supabaseClient.auth.signOut();
+
+  } finally {
+
+    window.location.href = "login.html";
+
+  }
+
+}
+
+
+/* =====================================================
+   REALTIME
+===================================================== */
+
+function setupRealtime() {
+
+  supabaseClient
+    .channel("students-admin")
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "students"
+      },
       async () => {
 
-        try {
+        await loadMembers();
 
-          await fetch(
-            SUPABASE_URL +
-            "/auth/v1/logout",
-            {
-              method: "POST",
+      }
+    )
+    .subscribe();
 
-              headers: {
-                "apikey":
-                  SUPABASE_ANON_KEY,
+}
 
-                "Authorization":
-                  "Bearer " +
-                  SUPABASE_ANON_KEY
-              }
-            }
-          );
 
-        } catch (error) {
+/* =====================================================
+   HELPERS
+===================================================== */
 
-          console.error(error);
+function fullName(member) {
 
-        }
+  const first =
+    member.first_name || "";
 
-        window.location.href =
-          "login.html";
+  const last =
+    member.last_name || "";
 
+  return `${first} ${last}`.trim() || "Sans nom";
+
+}
+
+
+function formatDate(date) {
+
+  if (!date) return "—";
+
+  try {
+
+    return new Date(date).toLocaleString(
+      "fr-FR",
+      {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
       }
     );
 
+  } catch {
 
-  /* ==================================================
-     CONNECTION
-  ================================================== */
+    return "—";
 
-  function setConnection(
-    text,
-    error
-  ) {
+  }
 
-    connectionText.textContent =
-      text;
+}
 
-    connectionStatus.classList.toggle(
-      "error",
-      Boolean(error)
+
+function formatDateShort(date) {
+
+  if (!date) return "—";
+
+  try {
+
+    return new Date(date).toLocaleDateString(
+      "fr-FR",
+      {
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit"
+      }
     );
 
-  }
+  } catch {
 
-
-  /* ==================================================
-     ERRORS
-  ================================================== */
-
-  function showError(text) {
-
-    const element =
-      document.getElementById(
-        "formError"
-      );
-
-    element.textContent =
-      text;
-
-    element.className =
-      "message error";
+    return "—";
 
   }
 
+}
 
-  function hideError() {
 
-    const element =
-      document.getElementById(
-        "formError"
-      );
+function escapeHtml(value) {
 
-    element.textContent =
-      "";
-
-    element.className =
-      "message";
-
+  if (value === null || value === undefined) {
+    return "";
   }
 
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 
-  /* ==================================================
-     HELPERS
-  ================================================== */
-
-  function formatDate(value) {
-
-    if (!value) {
-      return "—";
-    }
-
-    try {
-
-      return new Intl.DateTimeFormat(
-        "fr-FR",
-        {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric"
-        }
-      ).format(
-        new Date(value)
-      );
-
-    } catch {
-      return "—";
-    }
-
-  }
+}
 
 
-  function escapeHTML(value) {
+function showToast(message, error = false) {
 
-    return String(value)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
+  const container =
+    document.getElementById("toastContainer");
 
-  }
+  const toast =
+    document.createElement("div");
 
+  toast.className =
+    "toast" + (error ? " error" : "");
 
-  /* ==================================================
-     INIT
-  ================================================== */
+  toast.textContent = message;
 
-  async function init() {
+  container.appendChild(toast);
 
-    const user =
-      await requireAuth();
+  setTimeout(() => {
 
-    if (!user) {
-      return;
-    }
+    toast.remove();
 
-    await loadStudents();
+  }, 3500);
 
-  }
-
-
-  init();
+}
 
 </script>
 
